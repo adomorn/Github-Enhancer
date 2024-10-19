@@ -88,44 +88,42 @@ function createContributorCard(link) {
 }
 
 function updateCardWithHovercardData(card, username, hovercardData, settings) {
-    const detailsDiv = card.querySelector('.contributor-details');
-    if (hovercardData) {
-      let cardContent = `
-        <div class="contributor-main-info">
-          <div class="contributor-username">@${username}</div>
-          ${hovercardData.name ? `<div class="contributor-name">${hovercardData.name}</div>` : ''}
-        </div>
-        <div class="contributor-extra-info">
-      `;
-      
-      if (settings.showCommitInfo && hovercardData.commitInfo) {
-        cardContent += `<div class="contributor-info">${hovercardData.commitInfo}</div>`;
-      }
-      
-      if (settings.showTeamInfo && hovercardData.teamInfo) {
-        cardContent += `<div class="contributor-info">${hovercardData.teamInfo}</div>`;
-      }
-      
-      if (settings.showOrgInfo && hovercardData.orgInfo) {
-        cardContent += `<div class="contributor-info">${hovercardData.orgInfo}</div>`;
-      }
-      
-      cardContent += '</div>';
-      
-      detailsDiv.innerHTML = cardContent;
-    } else {
-      detailsDiv.innerHTML = `
-        <div class="contributor-main-info">
-          <div class="contributor-username">@${username}</div>
-        </div>
-        <div class="contributor-extra-info">
-          <div class="contributor-info">Error fetching details</div>
-        </div>
-      `;
+  const detailsDiv = card.querySelector('.contributor-details');
+  if (hovercardData) {
+    let cardContent = `
+      <div class="contributor-main-info">
+        <div class="contributor-username">@${username}</div>
+        ${hovercardData.name ? `<div class="contributor-name">${hovercardData.name}</div>` : ''}
+      </div>
+      <div class="contributor-extra-info">
+    `;
+    
+    if (settings.showCommitInfo && hovercardData.commitInfo) {
+      cardContent += `<div class="contributor-info">${hovercardData.commitInfo}</div>`;
     }
+    
+    if (settings.showTeamInfo && hovercardData.teamInfo) {
+      cardContent += `<div class="contributor-info">${hovercardData.teamInfo}</div>`;
+    }
+    
+    if (settings.showOrgInfo && hovercardData.orgInfo) {
+      cardContent += `<div class="contributor-info">${hovercardData.orgInfo}</div>`;
+    }
+    
+    cardContent += '</div>';
+    
+    detailsDiv.innerHTML = cardContent;
+  } else {
+    detailsDiv.innerHTML = `
+      <div class="contributor-main-info">
+        <div class="contributor-username">@${username}</div>
+      </div>
+      <div class="contributor-extra-info">
+        <div class="contributor-info">Error fetching details</div>
+      </div>
+    `;
   }
-  
-  // Diğer fonksiyonlar aynı kalabilir
+}
 
 function checkCompletion(enhancedCount, totalCount) {
   if (enhancedCount === totalCount) {
@@ -200,6 +198,3 @@ async function fetchHovercardData(username) {
     return null;
   }
 }
-
-// Note: debug function is assumed to be available globally
-// It should be defined in utils.js
