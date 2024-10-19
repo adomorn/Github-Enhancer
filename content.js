@@ -3,12 +3,28 @@ function debug(message) {
   console.log(`[GitHub Extension Debug]: ${message}`);
 }
 
+function observeRelativeTimes() {
+
+  const targetElement = document.querySelector('relative-time');
+  if (targetElement) {
+      console.debug(`Found ${targetElement}`);
+      enhanceRelativeTimes();
+  }
+}
+async function observeContributors() {
+    const targetElement = Array.from(document.querySelectorAll('.BorderGrid-row'))
+      .find(row => row.textContent.includes('Contributors'));
+  if (targetElement) {
+      console.debug(`Found ${targetElement}`);
+      enhanceContributors(await GithubExtensionSettings.loadSettings());
+  }
+}
 function observerAndRegister() {
   GithubExtensionSettings.loadSettings().then(settings => {
     if (settings.enhanceContributors) {
-      // observeDomForElement('.BorderGrid-row', enhanceContributors);
+       observeDomForElement(observeContributors);
     }
-    observeDomForElement('relative-time', enhanceRelativeTimes);
+    observeDomForElement(observeRelativeTimes);
   }).catch(error => {
     debug(`Error loading settings: ${error}`);
   });
@@ -16,7 +32,8 @@ function observerAndRegister() {
 
 
 // Ana geliştirme fonksiyonu
-function enhanceGitHub() {
+async function enhanceGitHub() {
+  const settings = await GithubExtensionSettings.loadSettings();
   debug("enhanceGitHub fonksiyonu çağrıldı");
   observerAndRegister();
 }

@@ -26,7 +26,6 @@ const defaultSettings = {
     });
   }
   
-  // Create settings UI
   function createSettingsUI() {
     const settingsContainer = document.createElement('div');
     settingsContainer.id = 'github-extension-settings';
@@ -97,7 +96,6 @@ const defaultSettings = {
     });
   }
   
-  // Toggle settings visibility
   function toggleSettings() {
     const settingsContainer = document.getElementById('github-extension-settings');
     if (settingsContainer) {
@@ -107,7 +105,6 @@ const defaultSettings = {
     }
   }
   
-  // Create settings button
   function createSettingsButton() {
     const button = document.createElement('button');
     button.textContent = '⚙️';
@@ -116,13 +113,11 @@ const defaultSettings = {
     document.body.appendChild(button);
   }
   
-  // Initialize settings
+
   function initSettings() {
     createSettingsButton();
-    // You can add more initialization logic here if needed
   }
   
-  // Export functions for use in other files
   window.GithubExtensionSettings = {
     loadSettings,
     saveSettings,

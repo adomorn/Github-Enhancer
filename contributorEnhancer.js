@@ -20,16 +20,6 @@ function enhanceContributors(settings) {
   }
 
   debug("Contributors section found");
-
-  // Add link to the CSS file
-  if (!document.querySelector('link[href$="github-extension-styles.css"]')) {
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = chrome.runtime.getURL('github-extension-styles.css');
-    document.head.appendChild(link);
-    debug("CSS file link added");
-  }
-
   const contributorItems = contributorsSection.querySelectorAll('li');
   debug(`${contributorItems.length} contributors found`);
   let enhancedCount = 0;

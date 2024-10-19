@@ -1,8 +1,4 @@
-function debug(message) {
-    console.log(`[GitHub Extension Debug]: ${message}`);
-  }
-  
-  function formatDateTime(dateTimeString) {
+function formatDateTime(dateTimeString) {
     const date = new Date(dateTimeString);
     return date.toLocaleString('tr-TR', {
       year: 'numeric',
@@ -15,7 +11,7 @@ function debug(message) {
   
   async function enhanceRelativeTimes() {
     debug("enhanceRelativeTimes function called");
-
+  
     const relativeTimes = document.querySelectorAll('relative-time');
     debug(`Found ${relativeTimes.length} relative-time elements`);
   
@@ -34,4 +30,3 @@ function debug(message) {
       }
     });
   }
-  

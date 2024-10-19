@@ -13,28 +13,10 @@ function formatDateTime(dateTimeString) {
     });
 }
 
-function fetchWithRetry(url, retries = 3) {
-    return fetch(url).catch(function (err) {
-        if (retries === 1) throw err;
-        return fetchWithRetry(url, retries - 1);
-    });
-}
 
-
-/**
- * Observes DOM mutations and triggers a callback when an element matching the query selector is found.
- * @param {string} querySelector - The CSS selector of the target element to observe.
- * @param {Function} callback - The callback function to execute when the target element is found.
- */
-const observeDomForElement = (querySelector, callback) => {
+const observeDomForElement = (callback) => {
     const observer = new MutationObserver((mutations, observerInstance) => {
-        
-        const targetElement = document.querySelector(querySelector);
-        if (targetElement) {
-            console.debug(`Found ${querySelector}`);
-            //observerInstance.disconnect();
-            callback();
-        }
+        callback();
     });
 
     observer.observe(document.body, {
@@ -42,4 +24,3 @@ const observeDomForElement = (querySelector, callback) => {
         subtree: true,
     });
 };
-
