@@ -1,0 +1,149 @@
+.contributor-card {
+  display: flex;
+  align-items: center;
+  background: rgba(22, 27, 34, 0.7);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 6px;
+  padding: 10px;
+  transition: all 0.3s ease;
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+  height: 80px;
+  margin-bottom: 10px;
+}
+
+.contributor-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+  height: auto;
+}
+
+.contributor-avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: 2px solid #30363d;
+  margin-right: 15px;
+  transition: all 0.3s ease;
+}
+
+.contributor-card:hover .contributor-avatar {
+  transform: scale(1.1) rotate(5deg);
+}
+
+.contributor-details {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.contributor-main-info {
+  transition: all 0.3s ease;
+}
+
+.contributor-username {
+  font-weight: bold;
+  color: #58a6ff;
+  font-size: 1em;
+  margin-bottom: 2px;
+}
+
+.contributor-name {
+  font-weight: bold;
+  color: #c9d1d9;
+  font-size: 0.9em;
+}
+
+.contributor-extra-info {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: all 1.5s ease;
+}
+
+.contributor-card:hover .contributor-extra-info {
+  max-height: 500px;
+  opacity: 1;
+  margin-top: 10px;
+}
+
+.contributor-info {
+  color: #8b949e;
+  font-size: 0.85em;
+  margin-top: 5px;
+  transform: translateY(20px);
+  opacity: 0;
+  transition: all 0.3s ease;
+}
+
+.contributor-card:hover .contributor-info {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.contributor-card:hover .contributor-info:nth-child(1) { transition-delay: 0.1s; }
+.contributor-card:hover .contributor-info:nth-child(2) { transition-delay: 0.2s; }
+.contributor-card:hover .contributor-info:nth-child(3) { transition-delay: 0.3s; }
+
+/* Settings UI styles */
+#github-extension-settings {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  background-color: #0d1117;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  padding: 20px;
+  z-index: 9999;
+  color: #c9d1d9;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+}
+
+#github-extension-settings h2 {
+  margin-top: 0;
+  color: #58a6ff;
+}
+
+#github-extension-settings button {
+  margin-top: 10px;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+#saveSettings {
+  background-color: #238636;
+  color: #ffffff;
+}
+
+#closeSettings {
+  background-color: #21262d;
+  color: #ffffff;
+  margin-left: 10px;
+}
+
+/* Settings button styles */
+.github-extension-settings-button {
+  position: fixed;
+  bottom: 10px;
+  left: 10px;
+  background-color: #21262d;
+  color: #c9d1d9;
+  border: none;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  font-size: 16px;
+  cursor: pointer;
+  z-index: 10000;
+}
+
+/* Enhanced date styles */
+.enhanced-date {
+  font-size: 0.85em;
+  color: var(--fgColor-accent, var(--color-accent-fg));
+  margin-top: 2px;
+}

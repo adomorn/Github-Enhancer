@@ -1,0 +1,35 @@
+{
+  "manifest_version": 3,
+  "name": "Enhanced GitHub Info",
+  "version": "1.3",
+  "description": "GitHub'da ekstra bilgiler gösterir: tam tarihler, contributor detayları ve repo istatistikleri.",
+  "permissions": [
+    "storage"
+  ],
+  "host_permissions": [
+    "https://github.com/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["https://github.com/*"],
+      "css": [
+        "content.css"
+      ],
+      "js": [
+        "utils.js",
+        "settings.js",
+        "dateTimeEnhancer.js",
+        "contributorEnhancer.js",
+        "content.js"
+      ]
+    }
+  ],
+  "action": {
+    "default_icon": {
+      "128": "icon.svg"
+    }
+  },
+  "icons": {
+    "128": "icon.svg"
+  }
+}
