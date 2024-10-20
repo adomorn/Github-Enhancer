@@ -7,3 +7,15 @@ node_modules
 # Generated files
 .psci
 output
+
+# macOS files
+.DS_Store
+
+# Compressed files
+*.zip
+*.tar.gz
+*.rar
+*.7z
+*.gz
+*.bz2
+*.xz

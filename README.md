@@ -1,10 +1,11 @@
-# Chrome Extension
+# GitHub Enhancer
 
-This repository contains a Chrome extension called **GitHub Enhancer**.
+This Chrome extension enhances your GitHub browsing experience by providing detailed contributor information and full date/time displays.
 
 ## Features
 
-- Enhance your GitHub browsing experience
+- Enhanced contributor cards with detailed information
+- Full date and time display for relative time elements
 - Customizable settings
 - Lightweight and fast
 
@@ -20,9 +21,19 @@ This repository contains a Chrome extension called **GitHub Enhancer**.
 
 ## Usage
 
-1. Click on the extension icon in the Chrome toolbar.
-2. Configure the settings as per your preference.
-3. Enjoy the enhanced GitHub browsing experience!
+1. Navigate to any GitHub repository page.
+2. The extension will automatically enhance the contributors section and date/time displays.
+3. Click the extension icon in the Chrome toolbar to access and modify settings.
+
+## Settings
+
+- Enhance Contributors: Toggle the enhanced contributor cards feature
+- Show Commit Info: Display commit information in contributor cards
+- Show Team Info: Display team information in contributor cards
+- Show Org Info: Display organization information in contributor cards
+- Card Width: Adjust the width of contributor cards
+- Max Cards: Set the maximum number of contributor cards to display
+- Locale: Set your preferred locale for date/time formatting
 
 ## Contributing
 
