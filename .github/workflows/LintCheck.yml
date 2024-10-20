@@ -21,7 +21,6 @@ jobs:
     - name: Install ESLint and plugins
       run: |
         npm install eslint@7.32.0 \
-                  eslint-plugin-react@7.28.0 \
                   @typescript-eslint/eslint-plugin@4.33.0 \
                   @typescript-eslint/parser@4.33.0
 
@@ -32,24 +31,20 @@ jobs:
             root: true,
             extends: [
               'eslint:recommended',
-              'plugin:react/recommended',
               'plugin:@typescript-eslint/recommended',
             ],
             parser: '@typescript-eslint/parser',
-            plugins: ['react', '@typescript-eslint'],
+            plugins: ['@typescript-eslint'],
             rules: {
               '@typescript-eslint/ban-ts-comment': 'off',
               '@typescript-eslint/no-explicit-any': 'off',
-              'react/prop-types': 'off',
               'no-unused-vars': 'off',
-              '@typescript-eslint/no-unused-vars': ['warn', { 'argsIgnorePattern': '^_', 'varsIgnorePattern': '^_' }],
-              'no-undef': 'warn',
-              '@typescript-eslint/no-unused-vars': 'warn'
-            },
-            settings: {
-              react: {
-                version: 'detect',
-              },
+              '@typescript-eslint/no-unused-vars': ['warn', { 
+                'argsIgnorePattern': '^_', 
+                'varsIgnorePattern': '^_',
+                'caughtErrorsIgnorePattern': '^_'
+              }],
+              'no-undef': 'warn'
             },
             env: {
               browser: true,
@@ -59,10 +54,7 @@ jobs:
             },
             parserOptions: {
               ecmaVersion: 2020,
-              sourceType: 'module',
-              ecmaFeatures: {
-                jsx: true,
-              },
+              sourceType: 'module'
             },
             globals: {
               chrome: 'readonly',
