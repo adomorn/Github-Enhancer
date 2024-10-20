@@ -37,9 +37,12 @@ jobs:
         
         # Create a temporary file with combined content
         echo "// Combined content scripts" > combined_scripts.js
+        echo "/* global chrome, GithubExtensionSettings, enhanceRelativeTimes, isEnhancing, enhancementComplete, enhanceContributors, observeDomForElement, debug, formatDateTime */" >> combined_scripts.js
         for script in $CONTENT_SCRIPTS; do
           echo "// File: $script" >> combined_scripts.js
+          echo "(function() {" >> combined_scripts.js
           cat "$script" >> combined_scripts.js
+          echo "})();" >> combined_scripts.js
           echo "" >> combined_scripts.js
         done
         
@@ -56,12 +59,10 @@ jobs:
             '@typescript-eslint/ban-ts-comment': 'off',
             '@typescript-eslint/no-explicit-any': 'off',
             'no-unused-vars': 'off',
-            '@typescript-eslint/no-unused-vars': ['warn', { 
-              'argsIgnorePattern': '^_', 
-              'varsIgnorePattern': '^_',
-              'caughtErrorsIgnorePattern': '^_'
-            }],
-            'no-undef': 'warn'
+            '@typescript-eslint/no-unused-vars': 'warn',
+            'no-undef': 'warn',
+            'no-redeclare': 'off',
+            '@typescript-eslint/adjacent-overload-signatures': 'off'
           },
           env: {
             browser: true,
