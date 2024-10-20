@@ -92,7 +92,7 @@ jobs:
         zip -r github-enhancer-${{ steps.manifest.outputs.version }}.zip . -x "*.git*" "node_modules/*" "*.md" ".github/*" "package*.json" ".eslintrc.js"
 
     - name: Upload artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: github-enhancer-${{ steps.manifest.outputs.version }}
         path: github-enhancer-${{ steps.manifest.outputs.version }}.zip
@@ -113,7 +113,7 @@ jobs:
         echo "version=$VERSION" >> $GITHUB_OUTPUT
 
     - name: Download artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: github-enhancer-${{ steps.manifest.outputs.version }}
 
