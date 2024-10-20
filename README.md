@@ -13,7 +13,7 @@ This Chrome extension enhances your GitHub browsing experience by providing deta
 
 1. Clone the repository:
     ```sh
-    git clone https://github.com/yourusername/github-enhancer.git
+    git clone https://github.com/adomorn/github-enhancer.git
     ```
 2. Open Chrome and navigate to `chrome://extensions/`.
 3. Enable "Developer mode" by clicking the toggle switch in the top right corner.
