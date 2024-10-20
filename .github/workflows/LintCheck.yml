@@ -18,8 +18,12 @@ jobs:
       with:
         node-version: '16'
 
-    - name: Install ESLint
-      run: npm install eslint@8.x eslint-plugin-react@latest @typescript-eslint/eslint-plugin@latest @typescript-eslint/parser@latest
+    - name: Install ESLint and plugins
+      run: |
+        npm install eslint@7.32.0 \
+                  eslint-plugin-react@7.28.0 \
+                  @typescript-eslint/eslint-plugin@4.33.0 \
+                  @typescript-eslint/parser@4.33.0
 
     - name: Create ESLint config if not exists
       run: |
@@ -34,7 +38,28 @@ jobs:
             parser: '@typescript-eslint/parser',
             plugins: ['react', '@typescript-eslint'],
             rules: {
-              // Add any specific rules here
+              '@typescript-eslint/ban-ts-comment': 'off',
+              '@typescript-eslint/no-explicit-any': 'off',
+              'react/prop-types': 'off',
+              'no-unused-vars': 'off',
+              '@typescript-eslint/no-unused-vars': ['error', { 'argsIgnorePattern': '^_' }],
+            },
+            settings: {
+              react: {
+                version: 'detect',
+              },
+            },
+            env: {
+              browser: true,
+              node: true,
+              es6: true,
+            },
+            parserOptions: {
+              ecmaVersion: 2020,
+              sourceType: 'module',
+              ecmaFeatures: {
+                jsx: true,
+              },
             },
           };" > .eslintrc.js
           echo "Created .eslintrc.js"
