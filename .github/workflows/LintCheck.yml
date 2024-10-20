@@ -23,67 +23,75 @@ jobs:
       with:
         node-version: '16'
 
-    - name: Install ESLint and plugins
+    - name: Install dependencies
       run: |
         npm install eslint@7.32.0 \
                   @typescript-eslint/eslint-plugin@4.33.0 \
-                  @typescript-eslint/parser@4.33.0
+                  @typescript-eslint/parser@4.33.0 \
+                  jq
 
-    - name: Create ESLint config if not exists
+    - name: Combine files and lint
       run: |
-        if [ ! -f ".eslintrc.js" ] && [ ! -f ".eslintrc.json" ] && [ ! -f ".eslintrc.yaml" ] && [ ! -f ".eslintrc.yml" ]; then
-          echo "module.exports = {
-            root: true,
-            extends: [
-              'eslint:recommended',
-              'plugin:@typescript-eslint/recommended',
-            ],
-            parser: '@typescript-eslint/parser',
-            plugins: ['@typescript-eslint'],
-            rules: {
-              '@typescript-eslint/ban-ts-comment': 'off',
-              '@typescript-eslint/no-explicit-any': 'off',
-              'no-unused-vars': 'off',
-              '@typescript-eslint/no-unused-vars': ['warn', { 
-                'argsIgnorePattern': '^_', 
-                'varsIgnorePattern': '^_',
-                'caughtErrorsIgnorePattern': '^_'
-              }],
-              'no-undef': 'warn'
-            },
-            env: {
-              browser: true,
-              node: true,
-              es6: true,
-              webextensions: true
-            },
-            parserOptions: {
-              ecmaVersion: 2020,
-              sourceType: 'module'
-            },
-            globals: {
-              chrome: 'readonly',
-              GithubExtensionSettings: 'readonly',
-              enhanceRelativeTimes: 'readonly',
-              isEnhancing: 'writable',
-              enhancementComplete: 'writable',
-              enhanceContributors: 'readonly',
-              observeDomForElement: 'readonly',
-              debug: 'readonly',
-              formatDateTime: 'readonly'
-            }
-          };" > .eslintrc.js
-          echo "Created .eslintrc.js"
-        else
-          echo "ESLint config already exists"
-        fi
+        # Read content scripts from manifest and combine them
+        CONTENT_SCRIPTS=$(jq -r '.content_scripts[0].js[]' manifest.json | tr '\n' ' ')
+        
+        # Create a temporary file with combined content
+        echo "// Combined content scripts" > combined_scripts.js
+        for script in $CONTENT_SCRIPTS; do
+          echo "// File: $script" >> combined_scripts.js
+          cat "$script" >> combined_scripts.js
+          echo "" >> combined_scripts.js
+        done
+        
+        # Create ESLint config
+        echo "module.exports = {
+          root: true,
+          extends: [
+            'eslint:recommended',
+            'plugin:@typescript-eslint/recommended',
+          ],
+          parser: '@typescript-eslint/parser',
+          plugins: ['@typescript-eslint'],
+          rules: {
+            '@typescript-eslint/ban-ts-comment': 'off',
+            '@typescript-eslint/no-explicit-any': 'off',
+            'no-unused-vars': 'off',
+            '@typescript-eslint/no-unused-vars': ['warn', { 
+              'argsIgnorePattern': '^_', 
+              'varsIgnorePattern': '^_',
+              'caughtErrorsIgnorePattern': '^_'
+            }],
+            'no-undef': 'warn'
+          },
+          env: {
+            browser: true,
+            node: true,
+            es6: true,
+            webextensions: true
+          },
+          parserOptions: {
+            ecmaVersion: 2020,
+            sourceType: 'module'
+          },
+          globals: {
+            chrome: 'readonly',
+            GithubExtensionSettings: 'readonly',
+            enhanceRelativeTimes: 'readonly',
+            isEnhancing: 'writable',
+            enhancementComplete: 'writable',
+            enhanceContributors: 'readonly',
+            observeDomForElement: 'readonly',
+            debug: 'readonly',
+            formatDateTime: 'readonly'
+          }
+        }" > .eslintrc.js
 
-    - name: Run ESLint
-      run: npx eslint . --ext .js,.jsx,.ts,.tsx
+        # Run ESLint on the combined file
+        npx eslint combined_scripts.js
 
     - name: Package extension
       run: |
-        zip -r github-enhancer.zip . -x "*.git*" "node_modules/*" "*.md" ".github/*" "package*.json" ".eslintrc.js"
+        zip -r github-enhancer.zip . -x "*.git*" "node_modules/*" "*.md" ".github/*" "package*.json" ".eslintrc.js" "combined_scripts.js"
 
     - name: Upload artifact
       uses: actions/upload-artifact@v3
@@ -97,10 +105,18 @@ jobs:
     if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/test')
 
     steps:
+    - uses: actions/checkout@v3
+
     - name: Download artifact
       uses: actions/download-artifact@v3
       with:
         name: github-enhancer-${{ github.ref_name }}
+
+    - name: Get version from manifest
+      id: get_version
+      run: |
+        VERSION=$(jq -r .version manifest.json)
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
 
     - name: Create Release
       id: create_release
@@ -108,8 +124,8 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: ${{ github.ref_name }}-${{ github.sha }}
-        release_name: Release ${{ github.ref_name }} ${{ github.sha }}
+        tag_name: v${{ steps.get_version.outputs.version }}
+        release_name: Release v${{ steps.get_version.outputs.version }}
         draft: false
         prerelease: ${{ github.ref != 'refs/heads/main' }}
 
@@ -120,5 +136,5 @@ jobs:
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: ./github-enhancer.zip
-        asset_name: github-enhancer-${{ github.ref_name }}.zip
+        asset_name: github-enhancer-v${{ steps.get_version.outputs.version }}.zip
         asset_content_type: application/zip
