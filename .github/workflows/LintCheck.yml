@@ -18,15 +18,36 @@ jobs:
       with:
         node-version: '16'
 
-    - name: Install dependencies
-      run: npm ci
+    - name: Install ESLint
+      run: npm install eslint@8.x eslint-plugin-react@latest @typescript-eslint/eslint-plugin@latest @typescript-eslint/parser@latest
 
-    - name: Run linter
-      run: npm run lint
+    - name: Create ESLint config if not exists
+      run: |
+        if [ ! -f ".eslintrc.js" ] && [ ! -f ".eslintrc.json" ] && [ ! -f ".eslintrc.yaml" ] && [ ! -f ".eslintrc.yml" ]; then
+          echo "module.exports = {
+            root: true,
+            extends: [
+              'eslint:recommended',
+              'plugin:react/recommended',
+              'plugin:@typescript-eslint/recommended',
+            ],
+            parser: '@typescript-eslint/parser',
+            plugins: ['react', '@typescript-eslint'],
+            rules: {
+              // Add any specific rules here
+            },
+          };" > .eslintrc.js
+          echo "Created .eslintrc.js"
+        else
+          echo "ESLint config already exists"
+        fi
+
+    - name: Run ESLint
+      run: npx eslint . --ext .js,.jsx,.ts,.tsx
 
     - name: Package extension
       run: |
-        zip -r github-enhancer.zip . -x "*.git*" "node_modules/*" "*.md" ".github/*" "package*.json"
+        zip -r github-enhancer.zip . -x "*.git*" "node_modules/*" "*.md" ".github/*" "package*.json" ".eslintrc.js"
 
     - name: Upload artifact
       uses: actions/upload-artifact@v3
