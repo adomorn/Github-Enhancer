@@ -4,7 +4,7 @@ on:
   push:
     branches: [ main, develop, test ]
   pull_request:
-    branches: [ main, develop, test ]
+    branches: [ main ]
 
 permissions:
   contents: write
@@ -12,6 +12,40 @@ permissions:
   issues: write
 
 jobs:
+  version-check:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' && github.base_ref == 'main' && github.head_ref == 'test'
+    
+    steps:
+    - name: Checkout main branch
+      uses: actions/checkout@v3
+      with:
+        ref: main
+
+    - name: Get main version
+      id: main_version
+      run: |
+        MAIN_VERSION=$(grep '"version"' manifest.json | cut -d '"' -f 4)
+        echo "main_version=$MAIN_VERSION" >> $GITHUB_OUTPUT
+
+    - name: Checkout PR branch
+      uses: actions/checkout@v3
+
+    - name: Get PR version
+      id: pr_version
+      run: |
+        PR_VERSION=$(grep '"version"' manifest.json | cut -d '"' -f 4)
+        echo "pr_version=$PR_VERSION" >> $GITHUB_OUTPUT
+
+    - name: Compare versions
+      run: |
+        if [ "${{ steps.main_version.outputs.main_version }}" == "${{ steps.pr_version.outputs.pr_version }}" ]; then
+          echo "Error: Version in manifest.json has not been updated."
+          exit 1
+        else
+          echo "Version has been updated from ${{ steps.main_version.outputs.main_version }} to ${{ steps.pr_version.outputs.pr_version }}"
+        fi
+
   lint-and-package:
     runs-on: ubuntu-latest
 
@@ -118,22 +152,10 @@ jobs:
         name: github-enhancer-${{ steps.manifest.outputs.version }}
 
     - name: Create Release
-      id: create_release
-      uses: actions/create-release@v1
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: v${{ steps.manifest.outputs.version }}
-        release_name: Release v${{ steps.manifest.outputs.version }}
-        draft: false
-        prerelease: false
-
-    - name: Upload Release Asset
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./github-enhancer-${{ steps.manifest.outputs.version }}.zip
-        asset_name: github-enhancer-${{ steps.manifest.outputs.version }}.zip
-        asset_content_type: application/zip
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        gh release create v${{ steps.manifest.outputs.version }} \
+          --title "Release v${{ steps.manifest.outputs.version }}" \
+          --notes "Release notes for version ${{ steps.manifest.outputs.version }}" \
+          github-enhancer-${{ steps.manifest.outputs.version }}.zip
