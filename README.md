@@ -1,4 +1,4 @@
-# GitHub Enhancer
+# GitHub Enhancer [![Chrome Extension CI](https://github.com/adomorn/Github-Enhancer/actions/workflows/chrome-extension-ci.yml/badge.svg)](https://github.com/adomorn/Github-Enhancer/actions/workflows/chrome-extension-ci.yml)
 
 This Chrome extension enhances your GitHub browsing experience by providing detailed contributor information and full date/time displays.
 
