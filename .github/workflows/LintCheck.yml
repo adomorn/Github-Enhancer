@@ -23,111 +23,99 @@ jobs:
       with:
         node-version: '16'
 
-    - name: Install dependencies
+    - name: Install ESLint and plugins
       run: |
         npm install eslint@7.32.0 \
                   @typescript-eslint/eslint-plugin@4.33.0 \
-                  @typescript-eslint/parser@4.33.0 \
-                  jq
+                  @typescript-eslint/parser@4.33.0
 
-    - name: Combine files and lint
+    - name: Create ESLint config if not exists
       run: |
-        # Read content scripts from manifest and combine them
-        CONTENT_SCRIPTS=$(jq -r '.content_scripts[0].js[]' manifest.json | tr '\n' ' ')
-        
-        # Create a temporary file with combined content
-        echo "// Combined content scripts" > combined_scripts.js
-        echo "/* eslint-disable @typescript-eslint/no-unused-vars */" >> combined_scripts.js
-        echo "/* global chrome */" >> combined_scripts.js
-        echo "window.GithubExtensionSettings = window.GithubExtensionSettings || {};" >> combined_scripts.js
-        echo "window.enhanceRelativeTimes = window.enhanceRelativeTimes || function() {};" >> combined_scripts.js
-        echo "window.isEnhancing = window.isEnhancing || false;" >> combined_scripts.js
-        echo "window.enhancementComplete = window.enhancementComplete || false;" >> combined_scripts.js
-        echo "window.enhanceContributors = window.enhanceContributors || function() {};" >> combined_scripts.js
-        echo "window.observeDomForElement = window.observeDomForElement || function() {};" >> combined_scripts.js
-        echo "window.debug = window.debug || function() {};" >> combined_scripts.js
-        echo "window.formatDateTime = window.formatDateTime || function() {};" >> combined_scripts.js
-        for script in $CONTENT_SCRIPTS; do
-          echo "// File: $script" >> combined_scripts.js
-          echo "(function() {" >> combined_scripts.js
-          cat "$script" >> combined_scripts.js
-          echo "})();" >> combined_scripts.js
-          echo "" >> combined_scripts.js
-        done
-        
-        # Create ESLint config
-        echo "module.exports = {
-          root: true,
-          extends: [
-            'eslint:recommended',
-            'plugin:@typescript-eslint/recommended',
-          ],
-          parser: '@typescript-eslint/parser',
-          plugins: ['@typescript-eslint'],
-          rules: {
-            '@typescript-eslint/ban-ts-comment': 'off',
-            '@typescript-eslint/no-explicit-any': 'off',
-            'no-unused-vars': 'off',
-            '@typescript-eslint/no-unused-vars': 'off',
-            'no-undef': 'warn',
-            'no-redeclare': 'off',
-            '@typescript-eslint/adjacent-overload-signatures': 'off',
-            'no-global-assign': 'off'
-          },
-          env: {
-            browser: true,
-            node: true,
-            es6: true,
-            webextensions: true
-          },
-          parserOptions: {
-            ecmaVersion: 2020,
-            sourceType: 'module'
-          },
-          globals: {
-            chrome: 'readonly',
-            GithubExtensionSettings: 'writable',
-            enhanceRelativeTimes: 'writable',
-            isEnhancing: 'writable',
-            enhancementComplete: 'writable',
-            enhanceContributors: 'writable',
-            observeDomForElement: 'writable',
-            debug: 'writable',
-            formatDateTime: 'writable'
-          }
-        }" > .eslintrc.js
+        if [ ! -f ".eslintrc.js" ] && [ ! -f ".eslintrc.json" ] && [ ! -f ".eslintrc.yaml" ] && [ ! -f ".eslintrc.yml" ]; then
+          echo "module.exports = {
+            root: true,
+            extends: [
+              'eslint:recommended',
+              'plugin:@typescript-eslint/recommended',
+            ],
+            parser: '@typescript-eslint/parser',
+            plugins: ['@typescript-eslint'],
+            rules: {
+              '@typescript-eslint/ban-ts-comment': 'off',
+              '@typescript-eslint/no-explicit-any': 'off',
+              'no-unused-vars': 'off',
+              '@typescript-eslint/no-unused-vars': ['warn', { 
+                'argsIgnorePattern': '^_', 
+                'varsIgnorePattern': '^_',
+                'caughtErrorsIgnorePattern': '^_'
+              }],
+              'no-undef': 'warn'
+            },
+            env: {
+              browser: true,
+              node: true,
+              es6: true,
+              webextensions: true
+            },
+            parserOptions: {
+              ecmaVersion: 2020,
+              sourceType: 'module'
+            },
+            globals: {
+              chrome: 'readonly',
+              GithubExtensionSettings: 'readonly',
+              enhanceRelativeTimes: 'readonly',
+              isEnhancing: 'writable',
+              enhancementComplete: 'writable',
+              enhanceContributors: 'readonly',
+              observeDomForElement: 'readonly',
+              debug: 'readonly',
+              formatDateTime: 'readonly'
+            }
+          };" > .eslintrc.js
+          echo "Created .eslintrc.js"
+        else
+          echo "ESLint config already exists"
+        fi
 
-        # Run ESLint on the combined file
-        npx eslint combined_scripts.js
+    - name: Run ESLint
+      run: npx eslint . --ext .js,.jsx,.ts,.tsx
+
+    - name: Read version from manifest
+      id: manifest
+      run: |
+        VERSION=$(grep '"version"' manifest.json | cut -d '"' -f 4)
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
 
     - name: Package extension
       run: |
-        zip -r github-enhancer.zip . -x "*.git*" "node_modules/*" "*.md" ".github/*" "package*.json" ".eslintrc.js" "combined_scripts.js"
+        zip -r github-enhancer-${{ steps.manifest.outputs.version }}.zip . -x "*.git*" "node_modules/*" "*.md" ".github/*" "package*.json" ".eslintrc.js"
 
     - name: Upload artifact
       uses: actions/upload-artifact@v3
       with:
-        name: github-enhancer-${{ github.ref_name }}
-        path: github-enhancer.zip
+        name: github-enhancer-${{ steps.manifest.outputs.version }}
+        path: github-enhancer-${{ steps.manifest.outputs.version }}.zip
 
   create-release:
     needs: lint-and-package
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/test')
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
 
     steps:
-    - uses: actions/checkout@v3
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Read version from manifest
+      id: manifest
+      run: |
+        VERSION=$(grep '"version"' manifest.json | cut -d '"' -f 4)
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
 
     - name: Download artifact
       uses: actions/download-artifact@v3
       with:
-        name: github-enhancer-${{ github.ref_name }}
-
-    - name: Get version from manifest
-      id: get_version
-      run: |
-        VERSION=$(jq -r .version manifest.json)
-        echo "version=$VERSION" >> $GITHUB_OUTPUT
+        name: github-enhancer-${{ steps.manifest.outputs.version }}
 
     - name: Create Release
       id: create_release
@@ -135,10 +123,10 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: v${{ steps.get_version.outputs.version }}
-        release_name: Release v${{ steps.get_version.outputs.version }}
+        tag_name: v${{ steps.manifest.outputs.version }}
+        release_name: Release v${{ steps.manifest.outputs.version }}
         draft: false
-        prerelease: ${{ github.ref != 'refs/heads/main' }}
+        prerelease: false
 
     - name: Upload Release Asset
       uses: actions/upload-release-asset@v1
@@ -146,6 +134,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./github-enhancer.zip
-        asset_name: github-enhancer-v${{ steps.get_version.outputs.version }}.zip
+        asset_path: ./github-enhancer-${{ steps.manifest.outputs.version }}.zip
+        asset_name: github-enhancer-${{ steps.manifest.outputs.version }}.zip
         asset_content_type: application/zip
