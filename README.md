@@ -43,3 +43,5 @@ Contributions are welcome! Please open an issue or submit a pull request.
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
+![Alt](https://repobeats.axiom.co/api/embed/f18cf543e0af776cea448efd11e221af3490e2d4.svg "Repobeats analytics image")
