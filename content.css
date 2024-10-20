@@ -1,7 +1,7 @@
 .contributor-card {
   display: flex;
   align-items: center;
-  background: rgba(22, 27, 34, 0.7);
+  background: var(--color-canvas-overlay);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   border-radius: 6px;
@@ -12,11 +12,12 @@
   overflow: hidden;
   height: 80px;
   margin-bottom: 10px;
+  border: 1px solid var(--color-border-default);
 }
 
 .contributor-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+  box-shadow: var(--color-shadow-medium);
   height: auto;
 }
 
@@ -24,7 +25,7 @@
   width: 60px;
   height: 60px;
   border-radius: 50%;
-  border: 2px solid #30363d;
+  border: 2px solid var(--color-border-default);
   margin-right: 15px;
   transition: all 0.3s ease;
 }
@@ -32,13 +33,6 @@
 .contributor-card:hover .contributor-avatar {
   transform: scale(1.2) rotate(12deg);
 }
-
-.contributor-card:hover .contributor-avatar {
-  transform: scale(1.2) rotate(12deg);
-}
-
-
-
 
 .contributor-details {
   flex-grow: 1;
@@ -52,14 +46,14 @@
 
 .contributor-username {
   font-weight: bold;
-  color: #58a6ff;
+  color: var(--color-accent-fg);
   font-size: 1em;
   margin-bottom: 2px;
 }
 
 .contributor-name {
   font-weight: bold;
-  color: #c9d1d9;
+  color: var(--color-fg-default);
   font-size: 0.9em;
 }
 
@@ -77,7 +71,7 @@
 }
 
 .contributor-info {
-  color: #8b949e;
+  color: var(--color-fg-muted);
   font-size: 0.85em;
   margin-top: 5px;
   transform: translateY(20px);
@@ -99,18 +93,18 @@
   position: fixed;
   bottom: 20px;
   left: 20px;
-  background-color: #0d1117;
-  border: 1px solid #30363d;
+  background-color: var(--color-canvas-default);
+  border: 1px solid var(--color-border-default);
   border-radius: 6px;
   padding: 20px;
   z-index: 9999;
-  color: #c9d1d9;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+  color: var(--color-fg-default);
+  font-family: var(--font-family-sans);
 }
 
 #github-extension-settings h2 {
   margin-top: 0;
-  color: #58a6ff;
+  color: var(--color-accent-fg);
 }
 
 #github-extension-settings button {
@@ -122,13 +116,13 @@
 }
 
 #saveSettings {
-  background-color: #238636;
-  color: #ffffff;
+  background-color: var(--color-btn-primary-bg);
+  color: var(--color-btn-primary-text);
 }
 
 #closeSettings {
-  background-color: #21262d;
-  color: #ffffff;
+  background-color: var(--color-btn-bg);
+  color: var(--color-btn-text);
   margin-left: 10px;
 }
 
@@ -137,9 +131,9 @@
   position: fixed;
   bottom: 10px;
   left: 10px;
-  background-color: #21262d;
-  color: #c9d1d9;
-  border: none;
+  background-color: var(--color-btn-bg);
+  color: var(--color-btn-text);
+  border: 1px solid var(--color-btn-border);
   border-radius: 50%;
   width: 30px;
   height: 30px;
@@ -151,14 +145,11 @@
 /* Enhanced date styles */
 .enhanced-date {
   font-size: 0.85em;
-  color: var(--fgColor-muted, var(--color-fg-muted)) !important;
+  color: var(--color-fg-muted) !important;
   margin-top: 2px;
 }
 
-
-
-
-
+/* Keep the energy flow animation as is, since it uses custom colors */
 @keyframes energyFlow {
   0% {
     background-position: 0% 50%;
@@ -169,12 +160,6 @@
   100% {
     background-position: 0% 50%;
   }
-}
-
-.contributor-card {
-  position: relative;
-  overflow: hidden;
-  transition: all 0.3s ease;
 }
 
 .contributor-card::before {
@@ -207,38 +192,18 @@
 
 .contributor-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-}
-
-.contributor-details {
-  position: relative;
-  z-index: 2;
-}
-
-.contributor-avatar {
-  transition: all 0.3s ease;
-}
-
-.contributor-card:hover .contributor-avatar {
-  transform: scale(1.1) rotate(5deg);
-  box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
-}
-
-.contributor-username,
-.contributor-name,
-.contributor-info {
-  transition: all 0.3s ease;
+  box-shadow: var(--color-shadow-large);
 }
 
 .contributor-card:hover .contributor-username {
-  color: #ff6b6b;
-  text-shadow: 0 0 5px rgba(255, 107, 107, 0.5);
+  color: var(--color-danger-fg);
+  text-shadow: 0 0 5px var(--color-danger-subtle);
 }
 
 .contributor-card:hover .contributor-name {
-  color: #4ecdc4;
+  color: var(--color-success-fg);
 }
 
 .contributor-card:hover .contributor-info {
-  color: #45b7d1;
+  color: var(--color-accent-fg);
 }
