@@ -46,7 +46,7 @@ jobs:
           echo "Version has been updated from ${{ steps.main_version.outputs.main_version }} to ${{ steps.pr_version.outputs.pr_version }}"
         fi
 
-  lint-and-package:
+  lint:
     runs-on: ubuntu-latest
 
     steps:
@@ -115,24 +115,8 @@ jobs:
     - name: Run ESLint
       run: npx eslint . --ext .js,.jsx,.ts,.tsx
 
-    - name: Read version from manifest
-      id: manifest
-      run: |
-        VERSION=$(grep '"version"' manifest.json | cut -d '"' -f 4)
-        echo "version=$VERSION" >> $GITHUB_OUTPUT
-
-    - name: Package extension
-      run: |
-        zip -r github-enhancer-${{ steps.manifest.outputs.version }}.zip . -x "*.git*" "node_modules/*" "*.md" ".github/*" "package*.json" ".eslintrc.js"
-
-    - name: Upload artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: github-enhancer-${{ steps.manifest.outputs.version }}
-        path: github-enhancer-${{ steps.manifest.outputs.version }}.zip
-
-  create-release:
-    needs: lint-and-package
+  build-and-release:
+    needs: [version-check, lint]
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
 
@@ -146,10 +130,9 @@ jobs:
         VERSION=$(grep '"version"' manifest.json | cut -d '"' -f 4)
         echo "version=$VERSION" >> $GITHUB_OUTPUT
 
-    - name: Download artifact
-      uses: actions/download-artifact@v4
-      with:
-        name: github-enhancer-${{ steps.manifest.outputs.version }}
+    - name: Package extension
+      run: |
+        zip -r github-enhancer-${{ steps.manifest.outputs.version }}.zip . -x "*.git*" "node_modules/*" "*.md" ".github/*" "package*.json" ".eslintrc.js"
 
     - name: Create Release
       env:
