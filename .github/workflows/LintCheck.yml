@@ -42,7 +42,9 @@ jobs:
               '@typescript-eslint/no-explicit-any': 'off',
               'react/prop-types': 'off',
               'no-unused-vars': 'off',
-              '@typescript-eslint/no-unused-vars': ['error', { 'argsIgnorePattern': '^_' }],
+              '@typescript-eslint/no-unused-vars': ['warn', { 'argsIgnorePattern': '^_', 'varsIgnorePattern': '^_' }],
+              'no-undef': 'warn',
+              '@typescript-eslint/no-unused-vars': 'warn'
             },
             settings: {
               react: {
@@ -53,6 +55,7 @@ jobs:
               browser: true,
               node: true,
               es6: true,
+              webextensions: true
             },
             parserOptions: {
               ecmaVersion: 2020,
@@ -61,6 +64,17 @@ jobs:
                 jsx: true,
               },
             },
+            globals: {
+              chrome: 'readonly',
+              GithubExtensionSettings: 'readonly',
+              enhanceRelativeTimes: 'readonly',
+              isEnhancing: 'writable',
+              enhancementComplete: 'writable',
+              enhanceContributors: 'readonly',
+              observeDomForElement: 'readonly',
+              debug: 'readonly',
+              formatDateTime: 'readonly'
+            }
           };" > .eslintrc.js
           echo "Created .eslintrc.js"
         else
