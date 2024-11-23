@@ -1,136 +1,310 @@
+/* Root Variables */
+:root {
+  /* Animation Timings */
+  --gh-ext-transition-fast: 0.15s;
+  --gh-ext-transition-normal: 0.3s;
+  --gh-ext-transition-slow: 0.5s;
+  
+  /* Spacing */
+  --gh-ext-spacing-xs: 4px;
+  --gh-ext-spacing-sm: 8px;
+  --gh-ext-spacing-md: 16px;
+  --gh-ext-spacing-lg: 24px;
+  
+  /* Component Sizes */
+  --gh-ext-card-height: 80px;
+  --gh-ext-avatar-size: 60px;
+  --gh-ext-settings-width: 300px;
+  
+  /* Z-index Layers */
+  --gh-ext-z-card: 1;
+  --gh-ext-z-settings: 9999;
+  --gh-ext-z-button: 10000;
+
+  /* Animation Colors - Using GitHub theme colors */
+  --gh-ext-gradient-1: var(--color-accent-subtle, #388bfd26);
+  --gh-ext-gradient-2: var(--color-success-subtle, #2ea04326);
+  --gh-ext-gradient-3: var(--color-attention-subtle, #d4a72c26);
+}
+
+/* Modern Card Animation Keyframes */
+@keyframes cardShimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+@keyframes pulseCard {
+  0% {
+    box-shadow: 0 0 0 0 var(--color-accent-subtle);
+  }
+  70% {
+    box-shadow: 0 0 0 10px transparent;
+  }
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+  }
+}
+
+/* Contributor Card */
 .contributor-card {
+  position: relative;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   background: var(--color-canvas-overlay);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--color-border-default);
   border-radius: 6px;
-  padding: 10px;
-  transition: all 0.3s ease;
+  padding: var(--gh-ext-spacing-sm);
+  margin-bottom: var(--gh-ext-spacing-sm);
   width: 100%;
+  height: var(--gh-ext-card-height);
   box-sizing: border-box;
   overflow: hidden;
-  height: 80px;
-  margin-bottom: 10px;
-  border: 1px solid var(--color-border-default);
+  z-index: var(--gh-ext-z-card);
+  transform: translateZ(0);
+  will-change: transform, height;
+  transition: all var(--gh-ext-transition-normal) ease;
+}
+
+/* Card Background Animation */
+.contributor-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background: linear-gradient(
+    120deg,
+    transparent 0%,
+    transparent 35%,
+    var(--gh-ext-gradient-1) 45%,
+    var(--gh-ext-gradient-2) 50%,
+    var(--gh-ext-gradient-3) 55%,
+    transparent 65%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  opacity: 0;
+  transition: opacity var(--gh-ext-transition-normal);
+  z-index: -1;
 }
 
 .contributor-card:hover {
-  transform: translateY(-5px);
-  box-shadow: var(--color-shadow-medium);
   height: auto;
+  transform: translateY(-5px);
+  box-shadow: 
+    0 8px 24px rgba(0, 0, 0, 0.12),
+    0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
+.contributor-card:hover::before {
+  opacity: 1;
+  animation: cardShimmer 3s linear infinite;
+}
+
+.contributor-card:focus-within {
+  outline: 2px solid var(--color-accent-fg);
+  outline-offset: 2px;
+}
+
+/* Avatar */
 .contributor-avatar {
-  width: 60px;
-  height: 60px;
+  width: var(--gh-ext-avatar-size);
+  height: var(--gh-ext-avatar-size);
   border-radius: 50%;
   border: 2px solid var(--color-border-default);
-  margin-right: 15px;
-  transition: all 0.3s ease;
+  margin-right: var(--gh-ext-spacing-md);
+  transform: translateZ(0);
+  will-change: transform;
+  transition: all var(--gh-ext-transition-normal) cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .contributor-card:hover .contributor-avatar {
-  transform: scale(1.2) rotate(12deg);
+  transform: scale(1.1) rotate(8deg);
+  border-color: var(--color-accent-fg);
+  box-shadow: 0 0 15px var(--color-accent-muted);
 }
 
+/* Details Section */
 .contributor-details {
-  flex-grow: 1;
+  flex: 1;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .contributor-main-info {
-  transition: all 0.3s ease;
+  transform: translateZ(0);
+  transition: transform var(--gh-ext-transition-normal) ease;
 }
 
 .contributor-username {
-  font-weight: bold;
+  font-weight: 600;
   color: var(--color-accent-fg);
   font-size: 1em;
-  margin-bottom: 2px;
+  margin-bottom: var(--gh-ext-spacing-xs);
+  transition: color var(--gh-ext-transition-normal) ease;
+}
+
+.contributor-card:hover .contributor-username {
+  color: var(--color-accent-emphasis);
 }
 
 .contributor-name {
-  font-weight: bold;
+  font-weight: 600;
   color: var(--color-fg-default);
   font-size: 0.9em;
+  transition: color var(--gh-ext-transition-normal) ease;
+}
+
+.contributor-card:hover .contributor-name {
+  color: var(--color-success-fg);
 }
 
 .contributor-extra-info {
   max-height: 0;
   opacity: 0;
   overflow: hidden;
-  transition: all 1.5s ease;
+  transform: translateY(10px);
+  transition: all var(--gh-ext-transition-normal) cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .contributor-card:hover .contributor-extra-info {
   max-height: 500px;
   opacity: 1;
-  margin-top: 10px;
+  transform: translateY(0);
+  margin-top: var(--gh-ext-spacing-sm);
 }
 
 .contributor-info {
   color: var(--color-fg-muted);
   font-size: 0.85em;
-  margin-top: 5px;
-  transform: translateY(20px);
+  margin-top: var(--gh-ext-spacing-xs);
+  padding: 4px 8px;
+  border-radius: 4px;
+  background: var(--color-canvas-subtle);
+  transform: translateX(-10px);
   opacity: 0;
-  transition: all 0.3s ease;
+  transition: all var(--gh-ext-transition-normal) cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .contributor-card:hover .contributor-info {
-  transform: translateY(0);
+  transform: translateX(0);
   opacity: 1;
 }
 
-.contributor-card:hover .contributor-info:nth-child(1) { transition-delay: 0.1s; }
-.contributor-card:hover .contributor-info:nth-child(2) { transition-delay: 0.2s; }
-.contributor-card:hover .contributor-info:nth-child(3) { transition-delay: 0.3s; }
+/* Staggered Animation */
+.contributor-card:hover .contributor-info:nth-child(1) {
+  transition-delay: 0.1s;
+}
+.contributor-card:hover .contributor-info:nth-child(2) {
+  transition-delay: 0.2s;
+}
+.contributor-card:hover .contributor-info:nth-child(3) {
+  transition-delay: 0.3s;
+}
 
-/* Settings UI styles */
+/* Settings Panel */
 #github-extension-settings {
   position: fixed;
-  bottom: 20px;
-  left: 20px;
-  background-color: var(--color-canvas-default);
+  bottom: var(--gh-ext-spacing-md);
+  left: var(--gh-ext-spacing-md);
+  background: var(--color-canvas-overlay);
   border: 1px solid var(--color-border-default);
   border-radius: 6px;
-  padding: 20px;
-  z-index: 9999;
-  color: var(--color-fg-default);
+  padding: var(--gh-ext-spacing-md);
+  width: var(--gh-ext-settings-width);
+  box-shadow: var(--color-shadow-medium);
+  z-index: var(--gh-ext-z-settings);
   font-family: var(--font-family-sans);
+  backdrop-filter: blur(8px);
+  color: var(--color-fg-default);
 }
 
 #github-extension-settings h2 {
-  margin-top: 0;
-  color: var(--color-accent-fg);
+  margin: 0 0 var(--gh-ext-spacing-md) 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-fg-default);
+  border-bottom: 1px solid var(--color-border-muted);
+  padding-bottom: var(--gh-ext-spacing-sm);
 }
 
-#github-extension-settings button {
-  margin-top: 10px;
-  border: none;
-  padding: 5px 10px;
-  border-radius: 6px;
+.settings-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.settings-controls label {
+  display: flex;
+  align-items: center;
+  gap: var(--gh-ext-spacing-sm);
+  font-size: 14px;
   cursor: pointer;
 }
 
-#saveSettings {
+.settings-controls input[type="checkbox"] {
+  margin: 0;
+  cursor: pointer;
+}
+
+.settings-controls input[type="number"],
+.settings-controls input[type="text"] {
+  padding: 4px 8px;
+  border: 1px solid var(--color-border-default);
+  border-radius: 4px;
+  background: var(--color-canvas-subtle);
+  color: var(--color-fg-default);
+  font-size: 14px;
+}
+
+.settings-controls input[type="number"] {
+  width: 80px;
+}
+
+.settings-controls input[type="text"] {
+  width: 120px;
+}
+
+/* Settings Buttons */
+.settings-buttons {
+  display: flex;
+  gap: var(--gh-ext-spacing-sm);
+  margin-top: var(--gh-ext-spacing-md);
+  justify-content: flex-end;
+}
+
+.settings-buttons button {
+  padding: 4px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--color-border-default);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--gh-ext-transition-fast) ease;
+}
+
+.settings-buttons button.btn-primary {
   background-color: var(--color-btn-primary-bg);
   color: var(--color-btn-primary-text);
+  border-color: var(--color-btn-primary-border);
 }
 
-#closeSettings {
-  background-color: var(--color-btn-bg);
-  color: var(--color-btn-text);
-  margin-left: 10px;
+.settings-buttons button:hover {
+  background-color: var(--color-btn-hover-bg);
+  transform: translateY(-1px);
 }
 
-/* Settings button styles */
+/* Settings Toggle Button */
 .github-extension-settings-button {
   position: fixed;
-  bottom: 10px;
-  left: 10px;
+  bottom: var(--gh-ext-spacing-sm);
+  left: var(--gh-ext-spacing-sm);
   background-color: var(--color-btn-bg);
   color: var(--color-btn-text);
   border: 1px solid var(--color-btn-border);
@@ -139,71 +313,79 @@
   height: 30px;
   font-size: 16px;
   cursor: pointer;
-  z-index: 10000;
+  z-index: var(--gh-ext-z-button);
+  transition: all var(--gh-ext-transition-fast) ease;
 }
 
-/* Enhanced date styles */
+.github-extension-settings-button:hover {
+  background-color: var(--color-btn-hover-bg);
+  transform: scale(1.1);
+}
+
+/* Enhanced Date Display */
 .enhanced-date {
   font-size: 0.85em;
-  color: var(--color-fg-muted) !important;
-  margin-top: 2px;
+  color: var(--color-fg-muted);
+  margin-top: var(--gh-ext-spacing-xs);
 }
 
-/* Keep the energy flow animation as is, since it uses custom colors */
-@keyframes energyFlow {
-  0% {
-    background-position: 0% 50%;
+/* Media Queries */
+@media (max-width: 768px) {
+  :root {
+    --gh-ext-avatar-size: 40px;
+    --gh-ext-settings-width: calc(100vw - 40px);
   }
-  50% {
-    background-position: 100% 50%;
+
+  .contributor-card {
+    padding: var(--gh-ext-spacing-xs);
   }
-  100% {
-    background-position: 0% 50%;
+
+  #github-extension-settings {
+    left: var(--gh-ext-spacing-sm);
+    right: var(--gh-ext-spacing-sm);
+    bottom: var(--gh-ext-spacing-sm);
+    width: auto;
   }
 }
 
-.contributor-card::before {
-  content: '';
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: linear-gradient(
-    45deg,
-    #ff3366,
-    #ff6b6b,
-    #4ecdc4,
-    #45b7d1,
-    #33658a,
-    #ff3366
-  );
-  background-size: 300% 300%;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  z-index: 1;
-  pointer-events: none;
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .contributor-card,
+  .contributor-card::before,
+  .contributor-avatar,
+  .contributor-extra-info,
+  .contributor-info,
+  .settings-buttons button {
+    transition: none !important;
+    animation: none !important;
+  }
+
+  .contributor-card:hover .contributor-avatar {
+    transform: none;
+  }
 }
 
-.contributor-card:hover::before {
-  opacity: 0.15;
-  animation: energyFlow 5s ease infinite;
+@media (prefers-contrast: high) {
+  .contributor-card {
+    border-width: 2px;
+  }
+
+  .contributor-username,
+  .contributor-name {
+    text-shadow: none;
+  }
 }
 
-.contributor-card:hover {
-  transform: translateY(-5px);
-  box-shadow: var(--color-shadow-large);
-}
+/* Print Styles */
+@media print {
+  .contributor-card {
+    break-inside: avoid;
+    border: 1px solid #000;
+    box-shadow: none;
+  }
 
-.contributor-card:hover .contributor-username {
-  color: var(--color-danger-fg);
-  text-shadow: 0 0 5px var(--color-danger-subtle);
-}
-
-.contributor-card:hover .contributor-name {
-  color: var(--color-success-fg);
-}
-
-.contributor-card:hover .contributor-info {
-  color: var(--color-accent-fg);
+  .github-extension-settings-button,
+  #github-extension-settings {
+    display: none;
+  }
 }

@@ -7,8 +7,13 @@
     "storage"
   ],
   "host_permissions": [
-    "https://github.com/*"
+    "https://github.com/*",
+    "https://api.github.com/*"
   ],
+  "oauth2": {
+    "client_id": "YOUR_GITHUB_CLIENT_ID",
+    "scopes": ["repo"]
+  },
   "content_scripts": [
     {
       "matches": ["https://github.com/*"],
@@ -18,8 +23,10 @@
       "js": [
         "utils.js",
         "settings.js",
+        "authHandler.js",
         "dateTimeEnhancer.js",
         "contributorEnhancer.js",
+        "fileSizeEnhancer.js",
         "content.js"
       ]
     }
