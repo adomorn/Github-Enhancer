@@ -19,3 +19,6 @@ output
 *.gz
 *.bz2
 *.xz
+
+# Test files
+html.html
