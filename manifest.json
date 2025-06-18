@@ -1,45 +1,68 @@
 {
   "manifest_version": 3,
-  "name": "Github Enhancer",
-  "version": "1.0",
-  "description": "A browser extension that enhances GitHub by displaying full dates and detailed contributor information",
+  "name": "GitHub Enhancer",
+  "version": "2.0.0",
+  "description": "GitHub sayfalarını geliştiren Chrome uzantısı - dosya boyutları, katkıda bulunanlar ve tarih bilgileri",
+  
   "permissions": [
-    "storage"
+    "activeTab",
+    "storage",
+    "scripting"
   ],
+  
   "host_permissions": [
     "https://github.com/*",
     "https://api.github.com/*"
   ],
-  "oauth2": {
-    "client_id": "YOUR_GITHUB_CLIENT_ID",
-    "scopes": ["repo"]
+  
+  "background": {
+    "service_worker": "src/background/service-worker.js"
   },
+  
   "content_scripts": [
     {
       "matches": ["https://github.com/*"],
-      "css": [
-        "content.css"
-      ],
       "js": [
-        "utils.js",
-        "settings.js",
-        "authHandler.js",
-        "dateTimeEnhancer.js",
-        "contributorEnhancer.js",
-        "fileSizeEnhancer.js",
-        "content.js"
-      ]
+        "src/utils/constants.js",
+        "src/utils/logger.js",
+        "src/utils/storage.js",
+        "src/utils/dom-utils.js",
+        "src/utils/date-utils.js",
+        "src/utils/api-utils.js",
+        "src/enhancers/base-enhancer.js",
+        "src/enhancers/date-enhancer.js",
+        "src/enhancers/contributor-enhancer.js",
+        "src/enhancers/file-size-enhancer.js",
+        "src/enhancers/theme-enhancer.js",
+        "src/content/main.js"
+      ],
+      "css": ["src/styles/content.css"],
+      "run_at": "document_end"
     }
   ],
+  
   "action": {
+    "default_popup": "src/popup/popup.html",
+    "default_title": "GitHub Enhancer",
     "default_icon": {
-      "128": "icon.svg"
+      "16": "assets/icons/16.png",
+      "32": "assets/icons/32.png",
+      "48": "assets/icons/48.png",
+      "128": "assets/icons/128.png"
     }
   },
+  
   "icons": {
-    "16": "16.png",
-    "32": "32.png",
-    "48": "48.png",
-    "128": "128.png"
-  }
+    "16": "assets/icons/16.png",
+    "32": "assets/icons/32.png",
+    "48": "assets/icons/48.png",
+    "128": "assets/icons/128.png"
+  },
+  
+  "web_accessible_resources": [
+    {
+      "resources": ["src/styles/*.css"],
+      "matches": ["https://github.com/*"]
+    }
+  ]
 }

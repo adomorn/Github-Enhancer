@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub Enhancer Settings</title>
+    <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+    <div class="popup-container">
+        <header class="popup-header">
+            <h1>GitHub Enhancer</h1>
+            <span class="version">v2.0.0</span>
+        </header>
+
+        <main class="popup-content">
+            <section class="settings-section">
+                <h2>Enhancement Features</h2>
+                <div class="setting-group">
+                    <label class="setting-item">
+                        <input type="checkbox" id="enhanceContributors">
+                        <span>Enhance Contributors</span>
+                    </label>
+                    <label class="setting-item">
+                        <input type="checkbox" id="enhanceDateTimes">
+                        <span>Enhance Date Times</span>
+                    </label>
+                    <label class="setting-item">
+                        <input type="checkbox" id="enhanceFileSizes">
+                        <span>Show File Sizes</span>
+                    </label>
+                    <label class="setting-item">
+                        <input type="checkbox" id="enableThemeEnhancements">
+                        <span>Enable Modern Theme & Animations</span>
+                    </label>
+                </div>
+            </section>
+
+            <section class="settings-section">
+                <h2>Display Settings</h2>
+                <div class="setting-group">
+                    <div class="setting-item">
+                        <label for="cardWidth">Card Width: <span id="cardWidthValue">250px</span></label>
+                        <input type="range" id="cardWidth" min="200" max="400" step="10">
+                    </div>
+                    <div class="setting-item">
+                        <label for="maxCards">Max Cards: <span id="maxCardsValue">10</span></label>
+                        <input type="range" id="maxCards" min="5" max="50" step="5">
+                    </div>
+                    <div class="setting-item">
+                        <label for="locale">Locale:</label>
+                        <select id="locale">
+                            <option value="en-US">English (US)</option>
+                            <option value="tr-TR">Türkçe</option>
+                        </select>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="popup-footer">
+            <button id="saveButton" class="button-primary">Save Settings</button>
+            <button id="resetButton" class="button-secondary">Reset</button>
+        </footer>
+    </div>
+
+    <script src="popup.js"></script>
+</body>
+</html> 
