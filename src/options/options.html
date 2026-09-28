@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Settings · GitHub Enhancer</title>
+  <link rel="stylesheet" href="../shared/ui.css">
+  <link rel="stylesheet" href="options.css">
+  <script src="../shared/model.js" defer></script>
+  <script src="../shared/client.js" defer></script>
+  <script src="options.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#settings-content">Skip to settings</a>
+  <header class="settings-header">
+    <a class="brand" href="https://github.com/adomorn/Github-Enhancer" target="_blank" rel="noreferrer">
+      <span class="brand-symbol" aria-hidden="true">g+</span>
+      <span class="brand-name">GitHub Enhancer</span>
+    </a>
+    <span class="header-caption">Your personal workbench</span>
+  </header>
+  <div class="settings-layout">
+    <aside class="settings-sidebar">
+      <div class="sidebar-title">Settings</div>
+      <nav aria-label="Settings sections">
+        <a href="#general">General</a>
+        <a href="#reading">Reading</a>
+        <a href="#backups">Workspace backups</a>
+        <a href="#privacy">Privacy &amp; permissions</a>
+      </nav>
+      <div class="sidebar-footnote"><span class="local-dot" aria-hidden="true"></span>Saved on this device</div>
+    </aside>
+    <main id="settings-content" tabindex="-1">
+      <div class="page-heading">
+        <h1>Make it yours.</h1>
+        <p>Adjust your workbench and the way you read GitHub.</p>
+      </div>
+      <div class="save-feedback">
+        <p id="save-status" role="status" aria-live="polite">Loading your settings…</p>
+        <button class="button compact" type="button" id="retry-load" hidden>Try again</button>
+      </div>
+      <form id="settings-form">
+        <section id="general" aria-labelledby="general-heading">
+          <h2 id="general-heading">General</h2>
+          <div class="setting-row master-row">
+            <div><label for="enabled">Enable GitHub Enhancer</label><p id="enabled-help">Show the workbench and your reading enhancements on GitHub. Turning it off keeps your saved work.</p></div>
+            <input class="switch" id="enabled" name="enabled" type="checkbox" role="switch" aria-describedby="enabled-help" disabled>
+          </div>
+          <div class="setting-row">
+            <div><label for="theme">Workbench appearance</label><p id="theme-help">Automatic follows GitHub in the workbench and your device in extension pages. GitHub keeps its own appearance.</p></div>
+            <select id="theme" name="theme" aria-describedby="theme-help" disabled><option value="auto">Automatic</option><option value="light">Light</option><option value="dark">Dark</option></select>
+          </div>
+          <div class="setting-row">
+            <div><label for="shortcut">Command shortcut</label><p id="shortcut-help">Open command search with <kbd>Alt</kbd> + <kbd>Shift</kbd> + <kbd>K</kbd>. On Mac, use Option for Alt. GitHub’s own shortcut is unchanged.</p></div>
+            <input class="switch" id="shortcut" name="shortcut" type="checkbox" role="switch" aria-describedby="shortcut-help" disabled>
+          </div>
+        </section>
+        <section id="reading" aria-labelledby="reading-heading">
+          <h2 id="reading-heading">Reading</h2>
+          <p class="section-description">Small changes to help you stay oriented. Apply them individually.</p>
+          <div class="setting-row">
+            <div><label for="exactDates">Show exact dates</label><p id="dates-help">Add the full date and time beside GitHub’s relative timestamps. The original timestamp stays in place.</p></div>
+            <input class="switch" id="exactDates" name="exactDates" type="checkbox" role="switch" aria-describedby="dates-help" disabled>
+          </div>
+          <div class="setting-row">
+            <div><label for="locale">Date language</label><p id="locale-help">Controls date formatting. The extension interface stays in English.</p></div>
+            <select id="locale" name="locale" aria-describedby="locale-help" disabled><option value="auto">Browser default</option><option value="en-US">English (US)</option><option value="tr-TR">Türkçe</option></select>
+          </div>
+          <div class="setting-row">
+            <div><label for="timeZone">Time zone</label><p id="timezone-help">Use your device’s time zone or a shared UTC reference.</p></div>
+            <select id="timeZone" name="timeZone" aria-describedby="timezone-help" disabled><option value="local">Local time</option><option value="UTC">UTC</option></select>
+          </div>
+          <div class="date-sample" aria-label="Timestamp preview"><span class="sample-label">Preview</span><span>2 days ago <span id="date-preview"></span></span></div>
+          <div class="setting-row">
+            <div><label for="wide">Wide repository content</label><p id="wide-help">Give supported repository content containers more room on larger screens.</p></div>
+            <input class="switch" id="wide" name="wide" type="checkbox" role="switch" aria-describedby="wide-help" disabled>
+          </div>
+          <div class="setting-row">
+            <div><label for="focus">Repository focus mode</label><p id="focus-help">Hide the About sidebar on repository overview pages. Issue and pull request controls stay visible.</p></div>
+            <input class="switch" id="focus" name="focus" type="checkbox" role="switch" aria-describedby="focus-help" disabled>
+          </div>
+        </section>
+      </form>
+      <section id="backups" aria-labelledby="backups-heading">
+        <div class="section-title-row"><h2 id="backups-heading">Workspace backups</h2><span id="workspace-count" class="item-count">Loading…</span></div>
+        <p class="section-description">Your workspace belongs to this browser profile. Export a backup to keep a copy or move it to another device.</p>
+        <div class="backup-actions">
+          <button class="button primary" id="export-button" type="button" disabled>Export backup</button>
+          <button class="button" id="import-button" type="button" disabled>Import backup</button>
+          <input id="import-file" type="file" accept=".json,application/json" hidden>
+        </div>
+        <p class="backup-detail">JSON backups include saved links, code excerpts, workspaces, private review notes, marks, and settings. The file is not encrypted, so store and share it with care.</p>
+        <p class="backup-detail">Import merges saved items and keeps newer local edits. Settings included in the backup are applied.</p>
+        <p id="backup-status" role="status" aria-live="polite"></p>
+      </section>
+      <section id="privacy" aria-labelledby="privacy-heading">
+        <h2 id="privacy-heading">Privacy &amp; permissions</h2>
+        <p class="section-description">No account, token, or external service is needed. Your saved pages and notes stay in this browser profile unless you export them.</p>
+        <dl class="permission-list">
+          <div><dt>Storage</dt><dd>Stores your saved items, notes, and preferences on this device.</dd></div>
+          <div><dt>Current tab</dt><dd>Reads the GitHub page you open the popup on, including loaded code or diffs for its page tools.</dd></div>
+          <div><dt>GitHub pages</dt><dd>Adds the workbench and optional reading controls on github.com. Pages you visit are not automatically saved.</dd></div>
+        </dl>
+        <p class="privacy-note">No analytics, remote fonts, or background GitHub API requests. Uninstalling the extension can remove its local data; export a backup first if you want to keep it.</p>
+      </section>
+      <footer class="settings-footer"><span>GitHub Enhancer</span><a href="https://github.com/adomorn/Github-Enhancer" target="_blank" rel="noreferrer">Source &amp; feedback</a></footer>
+    </main>
+  </div>
+</body>
+</html>

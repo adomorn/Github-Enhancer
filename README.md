@@ -1,158 +1,80 @@
-# 🚀 GitHub Enhancer 
-[![Chrome Extension CI](https://github.com/adomorn/Github-Enhancer/actions/workflows/chrome-extension-ci.yml/badge.svg)](https://github.com/adomorn/Github-Enhancer/actions/workflows/chrome-extension-ci.yml)
-![Version](https://img.shields.io/badge/version-2.0.0-blue.svg)
-![License](https://img.shields.io/badge/license-MIT-green.svg)
+# GitHub Enhancer
 
-Transform your GitHub browsing experience with stunning visual enhancements, modern animations, and improved functionality! ✨
+Private tools for code investigation and PR review on GitHub.
 
-## 🎯 Features
+Save repositories, issues, pull requests, discussions, commits, and code pages with a note about why they matter. Find them again from any GitHub page. GitHub Enhancer works without a token, an account, or a backend.
 
-### 🎨 **Theme Enhancements**
-- **🔢 Binary Cursor Trail** - Interactive 1/0 particles that follow your cursor with random rotation
-- **🌟 Enhanced Star Button Animations** - Magical glow effects with floating sparkles on hover/click
-- **🌌 Dynamic Floating Orbs Background** - Smooth animated orbs and geometric particles
-- **💫 Advanced 3D Hover Effects** - Glassmorphism with 3D transforms and perspective
-- **⚡ Micro-Interactions** - Enhanced file tree, code highlighting, and navigation animations
+## What's inside
 
-### 📊 **Data Enhancements**
-- **👥 Enhanced Contributor Cards** - Detailed contributor information with modern styling
-- **📅 Full Date/Time Display** - Complete timestamps instead of relative time
-- **📁 File Size Display** - Show file sizes in repository browsers
-- **🎛️ Customizable Settings** - Fine-tune all features through popup interface
+- **Code basket.** Open a code file, choose a line range and collect an excerpt with path, language, source link and a note. Combine excerpts from several files and copy or download Markdown. Full commit permalinks are distinguished from mutable branch/tag links.
+- **Private PR review.** On Files changed, filter loaded files and group by folder or type. Navigate with j/k or arrow keys in the file list, jump to a diff, collapse diff bodies, keep file notes and resume the last file. Local marks are separate from GitHub Viewed and submitted reviews. A known revision change requires reconfirmation; unknown revisions are always labeled unverified.
+- **Workspaces.** Group saved repositories, PRs, issues, comment links and code excerpts around one investigation. Add workspace notes, export the collection as Markdown (optionally including saved private file notes from linked PRs), and reopen up to ten page links at once.
 
-### 🔧 **Technical Features**
-- **🚀 Modern Architecture** - Modular enhancer system with BaseEnhancer class
-- **🎯 Performance Optimized** - Efficient DOM manipulation and event handling
-- **🌙 Dark/Light Theme Support** - Automatic theme detection and adaptation
-- **📱 Responsive Design** - Works seamlessly across different screen sizes
+- **Conversation navigator.** Search the loaded comments of an issue, PR or discussion by text/author, filter by author or saved status, jump to the original, and bookmark important comment permalinks for a workspace. Refresh after loading more comments.
+- **Reply drafts and templates.** Prepare a local Markdown draft in Write, reuse your own templates, and copy when ready. Thread drafts recover within the current browser session. Applying a template is explicit; the extension never posts to GitHub.
+- **Saved pages with private notes.** Search titles, repositories, and notes. Filter by page type. Remove a page with an Undo action.
+- **A workbench on GitHub.** The compact `g+ Enhancer` button opens an overlay. Notes live in an extension-origin frame, isolated from GitHub's page scripts. The toolbar popup opens the same workspace.
+- **Contextual actions.** Copy a page URL, Markdown link, or clone command. Jump to a repository's code, issues, pull requests, and releases.
+- **Command search.** Press **Alt + Shift + K** on GitHub or choose Commands. Search commands, workspace notes, collected code and private PR notes. Use arrows and Enter; Escape returns focus. GitHub's own shortcuts stay available. Disable the shortcut in Settings if needed.
+- **Reading preferences.** Exact local or UTC dates alongside GitHub's native timestamps, wider repository content, and an optional focus mode for the repository overview sidebar. Settings apply live.
+- **Portable backups.** Export pages, code excerpts, workspaces, review notes/marks, reply templates and settings as version 2 JSON, or merge a version 1 or 2 backup. More recent local notes take priority. Data stays in this browser unless you export it.
+- **Light and dark.** The in-page workbench follows GitHub; extension pages follow your device. You can choose a fixed appearance.
 
-## 🛠️ Installation
+## Install locally
 
-### Method 1: Chrome Web Store (Coming Soon)
-*Extension will be available on Chrome Web Store soon!*
+1. Clone this repository, or unzip a release package into a permanent folder.
+2. Open `chrome://extensions` in Chrome and enable **Developer mode**.
+3. Choose **Load unpacked** and select the folder containing `manifest.json`.
+4. Reload a GitHub tab. Click **g+ Enhancer** in the bottom-right corner.
 
-### Method 2: Developer Mode
-1. **Clone the repository:**
-    ```bash
-    git clone https://github.com/adomorn/Github-Enhancer.git
-    cd Github-Enhancer
-    ```
+No build or dependency installation is needed to use the extension. After changing code, click **Reload** on the extension's card and reload GitHub. Minimum Chrome version: 120. Download packaged versions from [GitHub Releases](https://github.com/adomorn/Github-Enhancer/releases). Chrome Web Store submission is being prepared; this repository does not imply store approval or availability of version 3.
 
-2. **Load in Chrome:**
-    - Open Chrome and navigate to `chrome://extensions/`
-    - Enable "Developer mode" (top right toggle)
-    - Click "Load unpacked" and select the project folder
+## A useful first minute
 
-3. **Enjoy!** 🎉
-    - Navigate to any GitHub page
-    - Extension will automatically enhance your experience
+Open a code file and choose **Code basket**. Select a line range, add a note, then save the excerpt. Visit another file to collect more evidence. In **Workspaces**, create an investigation and add the current page plus saved excerpts. Copy Markdown when you want to share your findings.
 
-## 🎮 Usage
+On a PR's Files changed page, **Tools** shows the loaded diff files. Add private notes, jump between files and mark progress locally. **Refresh page data** picks up more content after GitHub loads it. These tools never submit a GitHub review or comment.
 
-### 🌟 **Star Button Magic**
-- **Hover** over any star button to see magical glow effects
-- **Click** to trigger explosion animations with floating sparkles
-- Position stays fixed while maintaining beautiful visual feedback
+Notes save explicitly. Saved-page notes, workspace names/notes, code-excerpt annotations/ranges PR file-note drafts, reply drafts and template edits recover during the same browser session after reopening the popup or panel. Save explicitly to keep them across browser restarts. Code text itself is collected only when saving an excerpt. Settings save immediately. No browsing history is collected automatically.
 
-### 🔢 **Binary Cursor Trail**
-- Move your mouse to see subtle 1/0 particles following your cursor
-- Each particle has random rotation (-45° to +45°) for dynamic feel
-- Four different styles: zero (blue), one (green), matrix (green), cyber (pink)
+## Privacy and permissions
 
-### 🌌 **Background Animations**
-- Enjoy smooth floating orbs that drift across the background
-- Geometric particles (squares, triangles, diamonds) with rotation effects
-- All animations are performance-optimized and accessibility-friendly
+Only `storage` and `activeTab` permissions are requested. A declarative content script runs on `https://github.com/*` to display the launcher and optional reading tools. The worker makes no network requests. No PAT, GitHub API token, analytics, remote code, external fonts, or sign-in flow is used. Read [PRIVACY.md](PRIVACY.md).
 
-### ⚙️ **Settings Panel**
-Click the extension icon to access:
-- **Theme Enhancements** - Toggle modern animations and effects
-- **Contributor Cards** - Customize contributor information display
-- **Date/Time Format** - Choose your preferred time display format
-- **File Size Display** - Show/hide file sizes in repository browsers
+Backups contain note text and URLs, including any private repository names you explicitly saved. Keep exported files somewhere you trust. Uninstalling the extension removes its local data; export a backup first if you want to retain it.
 
-## 🎨 **Visual Showcase**
+## Development
 
-```
-🌟 Star Button Effects:    ✨ Magical glow + floating sparkles
-🔢 Cursor Trail:          1 0 1 0 (rotating binary particles)
-🌌 Background:            Floating orbs + geometric shapes
-💫 3D Effects:            Glassmorphism + perspective transforms
-⚡ Micro-interactions:    Enhanced hover states everywhere
+```sh
+npm ci --ignore-scripts
+npm test
+npm run check
+npm run package
 ```
 
-## 🔧 **Configuration Options**
+Node 22+ is needed for development checks. Runtime code has no npm dependencies; jsdom is a development-only DOM test dependency. Packaging produces `dist/github-enhancer-3.0.0.zip` from an allowlist of extension assets.
 
-| Setting | Description | Default |
-|---------|-------------|---------|
-| `enableThemeEnhancements` | Enable/disable all theme effects | `true` |
-| `enableEnhancedContributors` | Show enhanced contributor cards | `true` |
-| `enableDateTimeEnhancement` | Display full timestamps | `true` |
-| `enableFileSizeDisplay` | Show file sizes | `true` |
-| `contributorCardWidth` | Width of contributor cards | `300px` |
-| `maxContributorCards` | Maximum cards to display | `10` |
-| `locale` | Date/time formatting locale | `en-US` |
-
-## 🏗️ **Architecture**
-
-```
-src/
-├── 🎯 content/main.js          # Main content script
-├── 🔧 enhancers/               # Modular enhancement system
-│   ├── base-enhancer.js        # Base class for all enhancers
-│   ├── theme-enhancer.js       # Visual effects and animations
-│   ├── contributor-enhancer.js # Contributor card enhancements
-│   ├── date-enhancer.js        # Date/time improvements
-│   └── file-size-enhancer.js   # File size display
-├── 🎨 styles/content.css       # Global styles
-├── 🔧 utils/                   # Utility functions
-├── 🎛️ popup/                   # Extension popup interface
-└── 🚀 background/              # Service worker
+```text
+src/shared/       URL/data rules, extension UI and messaging client
+src/background/   Serialized local persistence and worker message boundary
+src/content/      One page lifecycle and reversible reading enhancements
+src/panel/        Isolated extension-origin workbench
+src/popup/        Browser toolbar workbench
+src/options/      Settings and backups
+tests/            Model, persistence, DOM, UI and settings regression tests
 ```
 
-## 🤝 **Contributing**
+## Scope and limitations
 
-We welcome contributions! Here's how to get started:
+- GitHub.com only; GitHub Enterprise domains are not currently supported.
+- Up to 500 saved pages, 100 excerpts (20,000 characters each), 40 workspaces 50 PR review records and 40 reply templates. Notes allow 10,000 characters.
+- Page tools use loaded GitHub content only. The file adapter reads at most 300,000 code characters; the review navigator lists at most 200 loaded files. Conversation snapshots hold at most 200 comments, 10,000 characters per comment and 300,000 characters in total. Hidden, paginated or unloaded content is not represented as a complete result.
+- A full commit in the diff URL is a verified revision; aggregate PR pages may not expose one. In that case local marks remain explicitly unverified.
+- Code lines from branch/tag URLs can change later. Use GitHub's permalink before collecting when an immutable reference matters.
+- Reading utilities depend on GitHub markup. They make narrow, reversible changes; GitHub layout updates may require selector adjustments.
+- Workspaces are device-local and do not sync between Chrome profiles or computers.
+- The older animated theme, expanded contributor cards, and API-based file sizes were retired. They added background work, fragile page replacements, and API limits; this version focuses on preserving personal context.
 
-1. **Fork** the repository
-2. **Create** a feature branch: `git checkout -b feature/amazing-feature`
-3. **Commit** your changes: `git commit -m '✨ Add amazing feature'`
-4. **Push** to branch: `git push origin feature/amazing-feature`
-5. **Open** a Pull Request
+See [CHANGELOG.md](CHANGELOG.md), [the research](docs/research/competitors.md), and [the technical audit](docs/research/technical-audit.md).
 
-### 🐛 **Bug Reports**
-Found a bug? Please open an issue with:
-- Browser version and OS
-- Steps to reproduce
-- Expected vs actual behavior
-- Screenshots if applicable
-
-### 💡 **Feature Requests**
-Have an idea? We'd love to hear it! Open an issue with:
-- Clear description of the feature
-- Use case and benefits
-- Any mockups or examples
-
-## 📜 **License**
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🙏 **Acknowledgments**
-
-- GitHub for providing an amazing platform to enhance
-- The open-source community for inspiration and feedback
-- All contributors who help make this extension better
-
-## 📊 **Analytics**
-
-![Alt](https://repobeats.axiom.co/api/embed/f18cf543e0af776cea448efd11e221af3490e2d4.svg "Repobeats analytics image")
-
----
-
-<div align="center">
-
-**⭐ Star this repo if you find it useful! ⭐**
-
-Made with ❤️ for the GitHub community
-
-</div>
+MIT licensed. Originally built by Arda Terekeci.

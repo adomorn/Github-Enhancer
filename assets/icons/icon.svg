@@ -1,5 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
-  <rect width="128" height="128" fill="#24292e"/>
-  <text x="64" y="64" font-family="Arial, sans-serif" font-size="80" fill="#ffffff" text-anchor="middle" dominant-baseline="central">GD</text>
-  <circle cx="100" cy="100" r="20" fill="#2ea44f"/>
+  <rect x="16" y="16" width="96" height="96" rx="24" fill="#0969da"/>
+  <g fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="49" cy="58" r="13"/>
+    <path d="M62 46v31c0 13-16 17-25 8M79 59h18M88 50v18"/>
+  </g>
 </svg>

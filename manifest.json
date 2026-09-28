@@ -1,49 +1,36 @@
 {
   "manifest_version": 3,
   "name": "GitHub Enhancer",
-  "version": "2.0.0",
-  "description": "GitHub sayfalarını geliştiren Chrome uzantısı - dosya boyutları, katkıda bulunanlar ve tarih bilgileri",
-  
+  "version": "3.0.0",
+  "minimum_chrome_version": "120",
+  "description": "Private PR review tools, source-linked code excerpts and workspaces for GitHub. Local storage. No tokens required.",
   "permissions": [
-    "activeTab",
     "storage",
-    "scripting"
+    "activeTab"
   ],
-  
-  "host_permissions": [
-    "https://github.com/*",
-    "https://api.github.com/*"
-  ],
-  
   "background": {
     "service_worker": "src/background/service-worker.js"
   },
-  
   "content_scripts": [
     {
-      "matches": ["https://github.com/*"],
+      "matches": [
+        "https://github.com/*"
+      ],
       "js": [
-        "src/utils/constants.js",
-        "src/utils/logger.js",
-        "src/utils/storage.js",
-        "src/utils/dom-utils.js",
-        "src/utils/date-utils.js",
-        "src/utils/api-utils.js",
-        "src/enhancers/base-enhancer.js",
-        "src/enhancers/date-enhancer.js",
-        "src/enhancers/contributor-enhancer.js",
-        "src/enhancers/file-size-enhancer.js",
-        "src/enhancers/theme-enhancer.js",
+        "src/shared/model.js",
+        "src/content/reading.js",
+        "src/content/code-tools.js",
+        "src/content/review-tools.js",
+        "src/content/conversation-tools.js",
+        "src/content/page-tools.js",
         "src/content/main.js"
       ],
-      "css": ["src/styles/content.css"],
-      "run_at": "document_end"
+      "run_at": "document_idle"
     }
   ],
-  
   "action": {
     "default_popup": "src/popup/popup.html",
-    "default_title": "GitHub Enhancer",
+    "default_title": "GitHub Enhancer \u2014 your saved work",
     "default_icon": {
       "16": "assets/icons/16.png",
       "32": "assets/icons/32.png",
@@ -51,18 +38,40 @@
       "128": "assets/icons/128.png"
     }
   },
-  
+  "options_page": "src/options/options.html",
   "icons": {
     "16": "assets/icons/16.png",
     "32": "assets/icons/32.png",
     "48": "assets/icons/48.png",
     "128": "assets/icons/128.png"
   },
-  
   "web_accessible_resources": [
     {
-      "resources": ["src/styles/*.css"],
-      "matches": ["https://github.com/*"]
+      "resources": [
+        "src/panel/panel.html",
+        "src/panel/panel.js",
+        "src/panel/panel.css",
+        "src/shared/model.js",
+        "src/shared/client.js",
+        "src/shared/ui.js",
+        "src/shared/ui.css",
+        "src/shared/basket.js",
+        "src/shared/basket.css",
+        "src/shared/review.js",
+        "src/shared/review.css",
+        "src/shared/workspaces.js",
+        "src/shared/workspaces.css",
+        "src/shared/conversation.js",
+        "src/shared/conversation.css",
+        "src/shared/composer.js",
+        "src/shared/composer.css"
+      ],
+      "matches": [
+        "https://github.com/*"
+      ]
     }
-  ]
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'none'; frame-ancestors https://github.com 'self';"
+  }
 }

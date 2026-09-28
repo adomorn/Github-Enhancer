@@ -22,3 +22,17 @@ output
 
 # Test files
 html.html
+
+# Local release and test artifacts
+dist/
+coverage/
+.superpowers/
+
+# Private development evidence; public research is explicitly allowlisted.
+docs/screenshots/
+docs/qa-exports/
+docs/superpowers/
+docs/store-release-draft.md
+docs/research/*
+!docs/research/competitors.md
+!docs/research/technical-audit.md

@@ -1,144 +1,24 @@
 name: Chrome Extension CI
-
 on:
   push:
-    branches: [ main, develop, test ]
+    branches: [main, develop, 'feat/**']
   pull_request:
-    branches: [ main ]
-
 permissions:
-  contents: write
-  pull-requests: write
-  issues: write
-
+  contents: read
 jobs:
-  version-check:
+  verify:
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request' && github.base_ref == 'main' && github.head_ref == 'test'
-    
     steps:
-    - name: Checkout main branch
-      uses: actions/checkout@v3
-      with:
-        ref: main
-
-    - name: Get main version
-      id: main_version
-      run: |
-        MAIN_VERSION=$(grep '"version"' manifest.json | cut -d '"' -f 4)
-        echo "main_version=$MAIN_VERSION" >> $GITHUB_OUTPUT
-
-    - name: Checkout PR branch
-      uses: actions/checkout@v3
-
-    - name: Get PR version
-      id: pr_version
-      run: |
-        PR_VERSION=$(grep '"version"' manifest.json | cut -d '"' -f 4)
-        echo "pr_version=$PR_VERSION" >> $GITHUB_OUTPUT
-
-    - name: Compare versions
-      run: |
-        if [ "${{ steps.main_version.outputs.main_version }}" == "${{ steps.pr_version.outputs.pr_version }}" ]; then
-          echo "Error: Version in manifest.json has not been updated."
-          exit 1
-        else
-          echo "Version has been updated from ${{ steps.main_version.outputs.main_version }} to ${{ steps.pr_version.outputs.pr_version }}"
-        fi
-
-  lint:
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v3
-
-    - name: Use Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: '16'
-
-    - name: Install ESLint and plugins
-      run: |
-        npm install eslint@7.32.0 \
-                  @typescript-eslint/eslint-plugin@4.33.0 \
-                  @typescript-eslint/parser@4.33.0
-
-    - name: Create ESLint config if not exists
-      run: |
-        if [ ! -f ".eslintrc.js" ] && [ ! -f ".eslintrc.json" ] && [ ! -f ".eslintrc.yaml" ] && [ ! -f ".eslintrc.yml" ]; then
-          echo "module.exports = {
-            root: true,
-            extends: [
-              'eslint:recommended',
-              'plugin:@typescript-eslint/recommended',
-            ],
-            parser: '@typescript-eslint/parser',
-            plugins: ['@typescript-eslint'],
-            rules: {
-              '@typescript-eslint/ban-ts-comment': 'off',
-              '@typescript-eslint/no-explicit-any': 'off',
-              'no-unused-vars': 'off',
-              '@typescript-eslint/no-unused-vars': ['warn', { 
-                'argsIgnorePattern': '^_', 
-                'varsIgnorePattern': '^_',
-                'caughtErrorsIgnorePattern': '^_'
-              }],
-              'no-undef': 'warn'
-            },
-            env: {
-              browser: true,
-              node: true,
-              es6: true,
-              webextensions: true
-            },
-            parserOptions: {
-              ecmaVersion: 2020,
-              sourceType: 'module'
-            },
-            globals: {
-              chrome: 'readonly',
-              GithubExtensionSettings: 'readonly',
-              enhanceRelativeTimes: 'readonly',
-              isEnhancing: 'writable',
-              enhancementComplete: 'writable',
-              enhanceContributors: 'readonly',
-              observeDomForElement: 'readonly',
-              debug: 'readonly',
-              formatDateTime: 'readonly'
-            }
-          };" > .eslintrc.js
-          echo "Created .eslintrc.js"
-        else
-          echo "ESLint config already exists"
-        fi
-
-    - name: Run ESLint
-      run: npx eslint . --ext .js,.jsx,.ts,.tsx
-
-  build-and-release:
-    needs: [version-check, lint]
-    runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
-
-    - name: Read version from manifest
-      id: manifest
-      run: |
-        VERSION=$(grep '"version"' manifest.json | cut -d '"' -f 4)
-        echo "version=$VERSION" >> $GITHUB_OUTPUT
-
-    - name: Package extension
-      run: |
-        zip -r github-enhancer-${{ steps.manifest.outputs.version }}.zip . -x "*.git*" "node_modules/*" "*.md" ".github/*" "package*.json" ".eslintrc.js"
-
-    - name: Create Release
-      env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: |
-        gh release create v${{ steps.manifest.outputs.version }} \
-          --title "Release v${{ steps.manifest.outputs.version }}" \
-          --notes "Release notes for version ${{ steps.manifest.outputs.version }}" \
-          github-enhancer-${{ steps.manifest.outputs.version }}.zip
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npm test
+      - run: npm run check
+      - run: npm run package
+      - uses: actions/upload-artifact@v4
+        with:
+          name: github-enhancer
+          path: dist/*.zip
