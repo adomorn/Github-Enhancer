@@ -1,411 +1,76 @@
-/**
- * Main Content Script for GitHub Enhancer
- * Coordinates all enhancement modules and handles initialization
- */
-
-const GitHubEnhancerMain = (() => {
-  const { Logger, Storage, DOMUtils } = window;
-  const { EVENT_TYPES, SELECTORS } = window.GITHUB_ENHANCER_CONSTANTS;
-
-  // State management
-  const state = {
-    initialized: false,
-    enhancers: new Map(),
-    settings: null,
-    pageType: null,
-    lastURL: null
-  };
-
-  /**
-   * Initialize the main extension
-   */
-  async function initialize() {
-    if (state.initialized) {
-      Logger.debug('GitHub Enhancer already initialized');
-      return;
+/* One lifecycle owner in the isolated content-script world. */
+(() => {
+  const G=globalThis.GHE;
+  if(G.runtime)return;
+  G.runtime=true;
+  const reading=G.createReadingEnhancer(document);
+  const host=document.createElement('div');host.dataset.gheHost='';host.id='ghe-workbench-host';
+  host.dataset.gheBuild='hello-v2';host.dataset.gheConnection='awaiting-hello';host.dataset.gheEvent='create';host.dataset.gheFrameLoads='0';
+  const shadow=host.attachShadow({mode:'open'});
+  const style=document.createElement('style');style.textContent=`
+    :host{all:initial;position:fixed;right:20px;bottom:20px;z-index:80;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color-scheme:light dark}
+    :host([hidden]){display:none!important}button{font:600 12px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#1f6feb;color:white;border:1px solid #388bfd;border-radius:8px;padding:10px 13px;cursor:pointer;display:flex;align-items:center;gap:9px;box-shadow:0 2px 6px #0003}button:hover{background:#1158c7}button:focus-visible{outline:3px solid #79c0ff;outline-offset:3px}button span:first-child{font-size:16px;letter-spacing:-1px}iframe{position:absolute;right:0;bottom:48px;width:400px;height:min(690px,calc(100dvh - 96px));border:1px solid #59636e;border-radius:12px;background:#0d1117;display:block;color-scheme:normal}iframe[hidden]{display:none}button[aria-expanded="true"]{background:#30363d;border-color:#59636e}
+    @media(max-width:480px){:host{right:12px;bottom:12px}iframe{width:calc(100vw - 24px);height:calc(100dvh - 84px)}}
+    @media(print){:host{display:none}}
+    .panel-status{position:absolute;right:0;bottom:48px;box-sizing:border-box;width:400px;min-height:180px;padding:28px;border:1px solid #30363d;border-radius:12px;background:#0d1117;color:#f0f6fc;box-shadow:0 8px 32px #0003;font-size:13px;line-height:1.6}.panel-status[hidden]{display:none}.panel-status strong{display:block;font-size:15px;margin-bottom:8px}.panel-status p{margin:0;color:#9198a1}:host([data-theme="light"]) .panel-status{background:#fff;color:#1f2328;border-color:#d1d9e0}:host([data-theme="light"]) .panel-status p{color:#59636e}@media(max-width:480px){.panel-status{width:calc(100vw - 24px)}}
+  `;
+  const launcher=document.createElement('button');launcher.type='button';launcher.setAttribute('aria-label','Open GitHub Enhancer');launcher.setAttribute('aria-expanded','false');launcher.title='GitHub Enhancer · Alt+Shift+K';
+  const symbol=document.createElement('span');symbol.textContent='g+';symbol.setAttribute('aria-hidden','true');const label=document.createElement('span');label.textContent='Enhancer';launcher.append(symbol,label);shadow.append(style,launcher);
+  const panelStatus=document.createElement('section');panelStatus.className='panel-status';panelStatus.dataset.ghePanelStatus='';panelStatus.hidden=true;panelStatus.setAttribute('role','status');panelStatus.setAttribute('aria-live','polite');
+  const statusTitle=document.createElement('strong'),statusDetail=document.createElement('p');panelStatus.append(statusTitle,statusDetail);shadow.append(panelStatus);
+  let settings=null,context=null,iframe=null,open=false,timer=null,lastContext='',pendingCommands=false,disposed=false,loadingTimer=null,requestId='',requestSequence=0,connected=false,frameURL='',frameObserver=null;
+  function theme(){const html=document.documentElement;const mode=html.dataset.colorMode;if(mode==='light')return'light';if(mode==='dark')return'dark';return matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}
+  function pageContext(){return G.parseContext(location.href,document.title);}
+  function eligibleFrame(){return iframe?.isConnected&&!iframe.hasAttribute('srcdoc')&&iframe.src===frameURL;}
+  function trace(stage){host.dataset.gheEvent=stage;host.dataset.gheConnection=connected?'connected':'awaiting-hello';host.dataset.gheFrameConnected=String(Boolean(iframe?.isConnected));host.dataset.gheSrcEqual=String(Boolean(iframe&&iframe.src===frameURL));host.dataset.gheHasSrcdoc=String(Boolean(iframe?.hasAttribute('srcdoc')));host.dataset.gheRequestId=requestId;}
+  function post(message){if(connected&&eligibleFrame()){if(message.type==='PING')trace('probe');iframe.contentWindow?.postMessage(message,`chrome-extension://${chrome.runtime.id}`);}}
+  function pageSnapshot(){const current=pageContext();return {context:current,pageData:G.collectPageData?.(document,current)||{}};}
+  function sendContext(){if(!connected||!eligibleFrame())return;post({source:'ghe-host',type:'CONTEXT',url:context?.url||location.href,title:context?.title||document.title,theme:theme(),pageData:pageSnapshot().pageData});}
+  function close(){open=false;clearTimeout(loadingTimer);loadingTimer=null;requestId='';pendingCommands=false;panelStatus.hidden=true;if(iframe)iframe.hidden=true;launcher.setAttribute('aria-expanded','false');launcher.setAttribute('aria-label','Open GitHub Enhancer');launcher.focus();trace('closed');}
+  function beginLoading(){
+    if(!open||!iframe)return;
+    clearTimeout(loadingTimer);iframe.hidden=true;panelStatus.hidden=false;panelStatus.dataset.state='loading';statusTitle.textContent='Opening your workspace';statusDetail.textContent='Connecting to GitHub Enhancer…';
+    requestId=String(++requestSequence);
+    loadingTimer=setTimeout(()=>{
+      loadingTimer=null;if(!open)return;requestId='';panelStatus.dataset.state='error';statusTitle.textContent='Panel could not load.';statusDetail.textContent='Reload this GitHub page or open GitHub Enhancer from the Chrome toolbar.';trace('timeout');
+    },8000);
+    post({source:'ghe-host',type:'PING',requestId});
+  }
+  function show(commands=false){if(!settings?.enabled)return;let panelURL;try{if(!chrome.runtime.id)throw new Error('Stale extension context');panelURL=chrome.runtime.getURL('src/panel/panel.html');}catch{open=true;connected=false;requestId='';clearTimeout(loadingTimer);loadingTimer=null;if(iframe)iframe.hidden=true;panelStatus.hidden=false;panelStatus.dataset.state='error';statusTitle.textContent='Reload this GitHub page';statusDetail.textContent='GitHub Enhancer was updated. Reload the page to connect to the new version.';launcher.setAttribute('aria-expanded','true');launcher.setAttribute('aria-label','Close GitHub Enhancer');return;}open=true;pendingCommands=commands;launcher.setAttribute('aria-expanded','true');launcher.setAttribute('aria-label','Close GitHub Enhancer');trace('open');
+    if(!iframe){
+      iframe=document.createElement('iframe');iframe.hidden=true;iframe.title='GitHub Enhancer workspace';iframe.setAttribute('allow','clipboard-write');
+      const invalidate=event=>{connected=false;requestId='';const reason=event?.type==='load'?'load':event?.[0]?.attributeName||'src-change';host.dataset.gheInvalidatedBy=reason;if(reason==='load')host.dataset.gheFrameLoads=String(Number(host.dataset.gheFrameLoads)+1);trace(reason==='load'?'load':'src-change');host.dataset.gheConnection='disconnected';if(open&&panelStatus.dataset.state!=='error')beginLoading();};
+      iframe.addEventListener('load',invalidate);
+      const params=new URLSearchParams({url:context?.url||location.href,title:context?.title||document.title,theme:theme()});frameURL=panelURL+'?'+params;iframe.src=frameURL;
+      frameObserver=new MutationObserver(invalidate);frameObserver.observe(iframe,{attributes:true,attributeFilter:['src','srcdoc','sandbox']});
+      shadow.append(iframe);
     }
-
-    try {
-      Logger.info('Initializing GitHub Enhancer');
-      
-      // Load settings
-      await loadSettings();
-      
-      // Set up logging level based on settings
-      if (state.settings.debugMode) {
-        Logger.setLogLevel(Logger.LOG_LEVELS.DEBUG);
-      }
-      
-      // Detect page type
-      detectPageType();
-      
-      // Initialize enhancers based on settings
-      await initializeEnhancers();
-      
-      // Set up global event listeners
-      setupEventListeners();
-      
-      // Set up URL change detection for SPA navigation
-      setupNavigationHandling();
-      
-      state.initialized = true;
-      Logger.info('GitHub Enhancer initialized successfully');
-      
-      // Dispatch initialization event
-      dispatchEvent(EVENT_TYPES.ENHANCEMENT_COMPLETE, {
-        action: 'initialized',
-        pageType: state.pageType
-      });
-      
-    } catch (error) {
-      Logger.logError(error, { context: 'Main initialization' });
-    }
+    beginLoading();
   }
-
-  /**
-   * Load settings from storage
-   */
-  async function loadSettings() {
-    try {
-      state.settings = await Storage.settings.load();
-      Logger.debug('Settings loaded:', state.settings);
-    } catch (error) {
-      Logger.logError(error, { context: 'Loading settings' });
-      state.settings = window.GITHUB_ENHANCER_CONSTANTS.DEFAULT_SETTINGS;
-    }
-  }
-
-  /**
-   * Detect the current GitHub page type
-   */
-  function detectPageType() {
-    const path = window.location.pathname;
-    
-    if (path === '/' || path === '') {
-      state.pageType = 'home';
-    } else if (path.includes('/settings')) {
-      state.pageType = 'settings';
-    } else if (path.includes('/pull/')) {
-      state.pageType = 'pull_request';
-    } else if (path.includes('/issues/')) {
-      state.pageType = 'issue';
-    } else if (path.includes('/commit/')) {
-      state.pageType = 'commit';
-    } else if (path.includes('/tree/') || path.includes('/blob/')) {
-      state.pageType = 'file_browser';
-    } else if (path.match(/^\/[^\/]+\/[^\/]+\/?$/)) {
-      state.pageType = 'repository';
-    } else {
-      state.pageType = 'other';
-    }
-    
-    Logger.debug(`Detected page type: ${state.pageType}`);
-  }
-
-  /**
-   * Initialize enhancer modules
-   */
-  async function initializeEnhancers() {
-    const enhancerConfigs = [
-      {
-        name: 'DateEnhancer',
-        enabled: state.settings.enhanceDateTimes,
-        module: window.DateEnhancer,
-        supportedPages: ['repository', 'file_browser', 'commit', 'pull_request', 'issue']
-      },
-      {
-        name: 'ContributorEnhancer', 
-        enabled: state.settings.enhanceContributors,
-        module: window.ContributorEnhancer,
-        supportedPages: ['repository']
-      },
-      {
-        name: 'FileSizeEnhancer',
-        enabled: state.settings.enhanceFileSizes,
-        module: window.FileSizeEnhancer,
-        supportedPages: ['repository', 'file_browser']
-      },
-      {
-        name: 'ThemeEnhancer',
-        enabled: state.settings.enableThemeEnhancements,
-        module: window.ThemeEnhancer,
-        supportedPages: ['repository', 'file_browser', 'commit', 'pull_request', 'issue', 'home', 'other']
-      }
-    ];
-
-    for (const config of enhancerConfigs) {
-      try {
-        if (!config.enabled) {
-          Logger.debug(`${config.name} disabled by settings`);
-          continue;
-        }
-
-        if (!config.supportedPages.includes(state.pageType)) {
-          Logger.debug(`${config.name} not supported on ${state.pageType} pages`);
-          continue;
-        }
-
-        if (!config.module) {
-          Logger.warn(`${config.name} module not loaded`);
-          continue;
-        }
-
-        // Create and initialize enhancer instance
-        const enhancer = new config.module(config.name);
-        await enhancer.initialize();
-        
-        state.enhancers.set(config.name, enhancer);
-        Logger.info(`${config.name} initialized successfully`);
-        
-      } catch (error) {
-        Logger.logError(error, { context: `Initializing ${config.name}` });
-      }
-    }
-  }
-
-  /**
-   * Set up global event listeners
-   */
-  function setupEventListeners() {
-    // Listen for settings changes from popup
-    chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-      if (message.type === 'SETTINGS_UPDATED') {
-        handleSettingsUpdate(message.payload);
-      } else if (message.type === 'PING') {
-        sendResponse({ status: 'active' });
-      }
-    });
-
-    // Listen for custom events from enhancers
-    document.addEventListener(EVENT_TYPES.ERROR_OCCURRED, handleEnhancerError);
-    document.addEventListener(EVENT_TYPES.ENHANCEMENT_COMPLETE, handleEnhancementComplete);
-
-    // Handle visibility changes
-    document.addEventListener('visibilitychange', () => {
-      if (!document.hidden) {
-        Logger.debug('Page became visible, refreshing enhancers');
-        refreshEnhancers();
-      }
-    });
-
-    Logger.debug('Global event listeners set up');
-  }
-
-  /**
-   * Set up navigation handling for SPA
-   */
-  function setupNavigationHandling() {
-    // Override pushState and replaceState to detect navigation
-    const originalPushState = history.pushState;
-    const originalReplaceState = history.replaceState;
-
-    history.pushState = function(...args) {
-      originalPushState.apply(this, args);
-      handleNavigation();
-    };
-
-    history.replaceState = function(...args) {
-      originalReplaceState.apply(this, args);
-      handleNavigation();
-    };
-
-    // Handle popstate events
-    window.addEventListener('popstate', handleNavigation);
-
-    Logger.debug('Navigation handling set up');
-  }
-
-  /**
-   * Handle navigation changes
-   */
-  function handleNavigation() {
-    const currentURL = window.location.href;
-    
-    if (currentURL !== state.lastURL) {
-      Logger.debug(`Navigation detected: ${state.lastURL} -> ${currentURL}`);
-      state.lastURL = currentURL;
-      
-      // Small delay to let DOM update
-      setTimeout(() => {
-        detectPageType();
-        reinitializeForNewPage();
-      }, 100);
-    }
-  }
-
-  /**
-   * Reinitialize enhancers for new page
-   */
-  async function reinitializeForNewPage() {
-    try {
-      Logger.debug(`Reinitializing for page type: ${state.pageType}`);
-      
-      // Clean up existing enhancers
-      for (const [name, enhancer] of state.enhancers) {
-        enhancer.cleanup();
-      }
-      state.enhancers.clear();
-      
-      // Reinitialize enhancers for new page
-      await initializeEnhancers();
-      
-    } catch (error) {
-      Logger.logError(error, { context: 'Page reinitialization' });
-    }
-  }
-
-  /**
-   * Handle settings updates from popup
-   */
-  async function handleSettingsUpdate(newSettings) {
-    try {
-      Logger.info('Received settings update:', newSettings);
-      
-      const oldSettings = state.settings;
-      state.settings = newSettings;
-      
-      // Update logging level
-      if (newSettings.debugMode !== oldSettings.debugMode) {
-        Logger.setLogLevel(newSettings.debugMode ? Logger.LOG_LEVELS.DEBUG : Logger.LOG_LEVELS.INFO);
-      }
-      
-      // Check which enhancers need to be enabled/disabled
-      const enhancerStateChanges = [
-        { name: 'DateEnhancer', old: oldSettings.enhanceDateTimes, new: newSettings.enhanceDateTimes },
-        { name: 'ContributorEnhancer', old: oldSettings.enhanceContributors, new: newSettings.enhanceContributors },
-        { name: 'FileSizeEnhancer', old: oldSettings.enhanceFileSizes, new: newSettings.enhanceFileSizes }
-      ];
-      
-      for (const change of enhancerStateChanges) {
-        if (change.old !== change.new) {
-          const enhancer = state.enhancers.get(change.name);
-          
-          if (change.new && !enhancer) {
-            // Need to initialize this enhancer
-            await initializeEnhancers();
-            break; // Re-initialize all to be safe
-          } else if (!change.new && enhancer) {
-            // Need to disable this enhancer
-            enhancer.disable();
-          } else if (change.new && enhancer) {
-            // Enable existing enhancer
-            enhancer.enable();
-          }
-        }
-      }
-      
-      // Update settings for all active enhancers
-      for (const [name, enhancer] of state.enhancers) {
-        if (enhancer.loadSettings) {
-          await enhancer.loadSettings();
-        }
-      }
-      
-      Logger.info('Settings update handled successfully');
-      
-    } catch (error) {
-      Logger.logError(error, { context: 'Handling settings update' });
-    }
-  }
-
-  /**
-   * Handle enhancer errors
-   */
-  function handleEnhancerError(event) {
-    const { enhancer, error, context } = event.detail;
-    Logger.warn(`Enhancer error from ${enhancer}: ${error} (${context})`);
-    
-    // Could implement error recovery logic here
-  }
-
-  /**
-   * Handle enhancement completion
-   */
-  function handleEnhancementComplete(event) {
-    const { enhancer, action } = event.detail;
-    Logger.debug(`Enhancement complete: ${enhancer} - ${action}`);
-    
-    // Could implement analytics or performance tracking here
-  }
-
-  /**
-   * Refresh all enhancers
-   */
-  async function refreshEnhancers() {
-    try {
-      for (const [name, enhancer] of state.enhancers) {
-        if (enhancer.isEnabled && enhancer.enhance) {
-          await enhancer.enhance();
-        }
-      }
-    } catch (error) {
-      Logger.logError(error, { context: 'Refreshing enhancers' });
-    }
-  }
-
-  /**
-   * Dispatch custom events
-   */
-  function dispatchEvent(type, detail = {}) {
-    const event = new CustomEvent(type, {
-      detail: {
-        timestamp: Date.now(),
-        ...detail
-      }
-    });
-    
-    document.dispatchEvent(event);
-  }
-
-  /**
-   * Cleanup function
-   */
-  function cleanup() {
-    try {
-      // Clean up all enhancers
-      for (const [name, enhancer] of state.enhancers) {
-        enhancer.cleanup();
-      }
-      state.enhancers.clear();
-      
-      // Remove event listeners
-      document.removeEventListener(EVENT_TYPES.ERROR_OCCURRED, handleEnhancerError);
-      document.removeEventListener(EVENT_TYPES.ENHANCEMENT_COMPLETE, handleEnhancementComplete);
-      
-      state.initialized = false;
-      Logger.info('GitHub Enhancer cleaned up');
-      
-    } catch (error) {
-      Logger.logError(error, { context: 'Cleanup' });
-    }
-  }
-
-  /**
-   * Public API
-   */
-  return {
-    initialize,
-    cleanup,
-    getStatus: () => ({
-      initialized: state.initialized,
-      pageType: state.pageType,
-      enhancerCount: state.enhancers.size,
-      settings: state.settings
-    }),
-    getEnhancers: () => Array.from(state.enhancers.keys()),
-    refreshEnhancers
-  };
+  launcher.addEventListener('click',()=>open?close():show());
+  function update(){timer=null;if(disposed||!settings)return;const reattached=!host.isConnected;if(reattached){connected=false;document.documentElement.append(host);host.dataset.gheInvalidatedBy='reattach';trace('reattach');host.dataset.gheConnection='disconnected';}context=pageContext();host.hidden=!settings.enabled;host.dataset.theme=settings.theme==='auto'?theme():settings.theme;reading.apply(settings,context);const next=JSON.stringify([context?.url,context?.title,theme()]);if(next!==lastContext){G.resetReviewTools?.(document);lastContext=next;sendContext();}if(!settings.enabled){G.resetReviewTools?.(document);if(open)close();}else if(reattached&&open)beginLoading();}
+  function schedule(){if(!timer)timer=setTimeout(update,40);}
+  const observer=new MutationObserver(records=>{if(records.some(record=>!host.contains(record.target)&&(record.type==='attributes'||![...record.addedNodes,...record.removedNodes].every(n=>n.nodeType===1&&n.hasAttribute?.('data-ghe-date')))))schedule();});
+  observer.observe(document.documentElement,{childList:true,subtree:true,attributes:true,attributeFilter:['datetime','data-color-mode','data-dark-theme','data-light-theme']});
+  for(const event of ['turbo:load','turbo:render','pjax:end'])document.addEventListener(event,schedule);
+  for(const event of ['popstate','hashchange','pageshow'])window.addEventListener(event,schedule);
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)schedule();});
+  window.addEventListener('keydown',event=>{
+    if(settings?.enabled&&settings.shortcut&&event.altKey&&event.shiftKey&&!event.ctrlKey&&!event.metaKey&&event.code==='KeyK'){event.preventDefault();show(true);}
+    else if(event.key==='Escape'&&open){close();}
+  });
+  window.addEventListener('message',event=>{
+    if(event.data?.source==='ghe-panel'&&['HELLO','READY','CLOSE'].includes(event.data.type)){host.dataset.gheLastReceived=event.data.type;host.dataset.gheRejected=!eligibleFrame()?'eligible':event.source!==iframe.contentWindow?'source':event.origin!==`chrome-extension://${chrome.runtime.id}`?'origin':event.data.type==='READY'&&event.data.requestId!==requestId?'request':'';}
+    if(!eligibleFrame()||event.source!==iframe.contentWindow||event.origin!==`chrome-extension://${chrome.runtime.id}`||event.data?.source!=='ghe-panel')return;
+    if(event.data.type==='HELLO'){connected=true;trace('hello');if(open&&requestId)post({source:'ghe-host',type:'PING',requestId});}
+    else if(event.data.type==='REQUEST_CONTEXT')sendContext();
+    else if(event.data.type==='PAGE_ACTION'&&connected){const ok=G.applyPageAction?.(document,event.data.action)||false;post({source:'ghe-host',type:'ACTION_RESULT',requestId:event.data.requestId,ok});}
+    else if(event.data.type==='CLOSE')close();else if(event.data.type==='READY'&&connected&&open&&requestId&&event.data.requestId===requestId){clearTimeout(loadingTimer);loadingTimer=null;requestId='';panelStatus.hidden=true;panelStatus.dataset.state='ready';iframe.hidden=false;sendContext();if(pendingCommands){post({source:'ghe-host',type:'COMMANDS'});pendingCommands=false;}iframe.focus();trace('ready');}
+  });
+  let generation=0;
+  async function load(){const current=++generation;try{const response=await chrome.runtime.sendMessage({type:'GET_STATE'});if(response?.ok&&current===generation){settings=response.state.settings;update();}}catch{if(iframe)close();host.hidden=true;reading.destroy();}}
+  chrome.storage.onChanged.addListener((_changes,area)=>{if(area==='local')load();});
+  chrome.runtime.onMessage.addListener((message,sender,respond)=>{if(sender.id&&sender.id!==chrome.runtime.id)return;if(message.type==='GET_CONTEXT')respond(pageSnapshot());else if(message.type==='PAGE_ACTION')respond({ok:settings?.enabled&&(G.applyPageAction?.(document,message.action)||false)});});
+  window.addEventListener('pagehide',event=>{if(!event.persisted){disposed=true;G.resetReviewTools?.(document);observer.disconnect();frameObserver?.disconnect();clearTimeout(timer);clearTimeout(loadingTimer);}});
+  document.documentElement.append(host);load();
 })();
-
-// Initialize when DOM is ready
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', GitHubEnhancerMain.initialize);
-} else {
-  GitHubEnhancerMain.initialize();
-}
-
-// Clean up on page unload
-window.addEventListener('beforeunload', GitHubEnhancerMain.cleanup);
-
-// Global access for debugging
-window.GitHubEnhancerMain = GitHubEnhancerMain; 

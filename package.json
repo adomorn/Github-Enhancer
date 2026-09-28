@@ -1,0 +1,15 @@
+{
+  "name": "github-enhancer",
+  "version": "3.0.0",
+  "private": true,
+  "description": "A private, token-free workbench for GitHub.",
+  "scripts": {
+    "test": "node --test tests/*.test.cjs",
+    "check": "node scripts/check.cjs",
+    "package": "node scripts/package.cjs"
+  },
+  "devDependencies": {
+    "jsdom": "^26.1.0"
+  },
+  "engines": { "node": ">=22" }
+}
