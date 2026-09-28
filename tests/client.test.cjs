@@ -32,6 +32,16 @@ test('worker validation errors remain distinct from transport and missing-respon
 
 function setup() {
   const data = {};
+  // Chrome shares exclusive Web Locks across extension surfaces. Keep that
+  // boundary explicit: Node 22 has navigator, but does not have navigator.locks.
+  const queues = new Map();
+  const locks = {
+    request(name, operation) {
+      const result = (queues.get(name) || Promise.resolve()).then(operation);
+      queues.set(name, result.catch(() => {}));
+      return result;
+    }
+  };
   const session = {
     async get(keys) {
       const snapshot = keys === null ? {...data} : Object.fromEntries((Array.isArray(keys)?keys:[keys]).filter(key=>Object.hasOwn(data,key)).map(key=>[key,data[key]]));
@@ -42,8 +52,7 @@ function setup() {
     async remove(key) {delete data[key];}
   };
   function client() {
-    // Native Node Web Locks provides the same async locking boundary as Chrome.
-    const context = vm.createContext({GHE:{},navigator:{locks:navigator.locks},chrome:{storage:{session}}});
+    const context = vm.createContext({GHE:{},navigator:{locks},chrome:{storage:{session}}});
     vm.runInContext(source,context);
     return context.GHE.draftOptions;
   }
